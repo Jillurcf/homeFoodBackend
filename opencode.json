@@ -6,7 +6,7 @@
       "url": "https://my-mcp-server.com",
       "enabled": true,
       "headers": {
-        "Authorization": "<your-github-pat>"
+        "Authorization": "Bearer {env:GITHUB_TOKEN}"
       }
     }
   }

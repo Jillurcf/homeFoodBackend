@@ -1,3 +1,6 @@
+import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
+import { NotoSansBengali_500Medium } from '@expo-google-fonts/noto-sans-bengali';
+import { colors } from '@/src/constants/theme';
 import { ShopProvider } from '@/src/store/shopStore';
 import { loadAsync } from 'expo-font';
 import { Slot } from "expo-router";
@@ -16,6 +19,8 @@ export default function RootLayout() {
     loadAsync({
       AvenirLTProBlack: require('../assets/fonts/AvenirLTProBlack.otf'),
       AvenirLTProBook: require('../assets/fonts/AvenirLTProBook.otf'),
+      Fraunces_600SemiBold,
+      NotoSansBengali_500Medium,
     })
       .then(() => {
         console.log("[_layout] fonts loaded");
@@ -29,13 +34,13 @@ export default function RootLayout() {
 
   return (
     <Provider store={store}>
-      <SafeAreaProvider style={{flex: 1, backgroundColor: "#F36C26"}}>
+      <SafeAreaProvider style={{flex: 1, backgroundColor: colors.primary}}>
         <KeyboardProvider>
-          <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#F36C26" }}>
+          <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.primary }}>
 
             {/* IMPORTANT: StatusBar config */}
             <StatusBar
-              backgroundColor="#F36C26"
+              backgroundColor={colors.primary}
               barStyle="light-content"
             />
 
