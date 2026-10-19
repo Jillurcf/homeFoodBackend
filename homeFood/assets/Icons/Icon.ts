@@ -904,4 +904,35 @@ export const IconSupport = `<svg width="30" height="30" viewBox="0 0 24 24" fill
 export const IconDeleteUser = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M4.5 4.5L10.5 10.5M4.5 10.5L10.5 4.5M7.5 0.5L0.5 4.5V5.21989C0.5 9.52908 3.35661 13.3162 7.5 14.5C11.6434 13.3162 14.5 9.52908 14.5 5.21989V4.5L7.5 0.5Z" stroke="white" stroke-linejoin="round"/>
 </svg>
+`
+
+// Tab bar icons use a __TINT__ placeholder that is replaced with the active/inactive color at runtime.
+export const IconTabHome = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 9.5L12 2.5L21 9.5V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.5Z" stroke="__TINT__" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 21V13H15V21" stroke="__TINT__" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+export const IconTabFavorites = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20.84 4.61C18.64 2.41 15.07 2.41 12.87 4.61L12 5.48L11.13 4.61C8.93 2.41 5.36 2.41 3.16 4.61C0.96 6.81 0.96 10.38 3.16 12.58L12 21.42L20.84 12.58C23.04 10.38 23.04 6.81 20.84 4.61Z" stroke="__TINT__" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+export const IconTabCart = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="9.5" cy="20" r="1.5" stroke="__TINT__" stroke-width="2"/>
+<circle cx="18" cy="20" r="1.5" stroke="__TINT__" stroke-width="2"/>
+<path d="M2 3H4L6.5 14.5C6.68 15.38 7.46 16 8.38 16H17.5C18.42 16 19.2 15.38 19.4 14.5L21 6H5.5" stroke="__TINT__" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+`
+export const IconTabOrders = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 6H21" stroke="__TINT__" stroke-width="2" stroke-linecap="round"/>
+<path d="M8 12H21" stroke="__TINT__" stroke-width="2" stroke-linecap="round"/>
+<path d="M8 18H21" stroke="__TINT__" stroke-width="2" stroke-linecap="round"/>
+<path d="M3 6H3.01" stroke="__TINT__" stroke-width="3" stroke-linecap="round"/>
+<path d="M3 12H3.01" stroke="__TINT__" stroke-width="3" stroke-linecap="round"/>
+<path d="M3 18H3.01" stroke="__TINT__" stroke-width="3" stroke-linecap="round"/>
+</svg>
+`
+export const IconTabProfile = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="12" cy="7" r="4" stroke="__TINT__" stroke-width="2"/>
+<path d="M4 21V20C4 16.6863 6.68629 14 10 14H14C17.3137 14 20 16.6863 20 20V21" stroke="__TINT__" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
 `    

@@ -100,10 +100,10 @@ describe('Splash / Index Screen', () => {
   });
 
   // -----------------------------------------------------------------------
-  // Redirect to drawer if authenticated
+  // Redirect to tabs if authenticated
   // -----------------------------------------------------------------------
-  describe('redirect to drawer when authenticated', () => {
-    it('should redirect to drawer when hasChecked is true and isAuthenticated is true', () => {
+  describe('redirect to tabs when authenticated', () => {
+    it('should redirect to tabs when hasChecked is true and isAuthenticated is true', () => {
       mockState.auth.hasChecked = true;
       mockState.auth.isAuthenticated = true;
       mockState.auth.user = { id: '1', name: 'Test User' };
@@ -114,7 +114,7 @@ describe('Splash / Index Screen', () => {
       // It uses setTimeout(..., 200), so we need to advance timers
       // But since we use mocked timers or real timers, the redirect
       // should be called
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
 
     it('should not redirect when hasChecked is false even if isAuthenticated is true', () => {
@@ -134,16 +134,16 @@ describe('Splash / Index Screen', () => {
       render(<Index />);
 
       // Should redirect to login instead
-      expect(mockReplace).not.toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).not.toHaveBeenCalledWith('/(tabs)');
     });
 
-    it('should navigate to the correct drawer path', () => {
+    it('should navigate to the correct tabs path', () => {
       mockState.auth.hasChecked = true;
       mockState.auth.isAuthenticated = true;
 
       render(<Index />);
 
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
   });
 
@@ -231,7 +231,7 @@ describe('Splash / Index Screen', () => {
   // State transition: loading → authenticated
   // -----------------------------------------------------------------------
   describe('state transition from loading to authenticated', () => {
-    it('should redirect to drawer after auth check succeeds', () => {
+    it('should redirect to tabs after auth check succeeds', () => {
       mockState.auth.hasChecked = false;
       mockState.auth.isAuthenticated = false;
 
@@ -244,7 +244,7 @@ describe('Splash / Index Screen', () => {
 
       rerender(<Index />);
 
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
 
     it('should not show spinner after auth check completes', () => {
@@ -306,7 +306,7 @@ describe('Splash / Index Screen', () => {
       render(<Index />);
 
       // router.replace should be used, not router.push
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
   });
 });

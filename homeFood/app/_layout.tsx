@@ -1,9 +1,10 @@
 import { Fraunces_600SemiBold } from '@expo-google-fonts/fraunces';
 import { NotoSansBengali_500Medium } from '@expo-google-fonts/noto-sans-bengali';
 import { colors } from '@/src/constants/theme';
+import { CartProvider } from '@/src/store/cartStore';
 import { ShopProvider } from '@/src/store/shopStore';
 import { loadAsync } from 'expo-font';
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import { useEffect, useState } from "react";
 import { StatusBar } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -45,7 +46,9 @@ export default function RootLayout() {
             />
 
             <ShopProvider>
-              <Slot />
+              <CartProvider>
+                <Stack screenOptions={{ headerShown: false }} />
+              </CartProvider>
             </ShopProvider>
 
           </GestureHandlerRootView>

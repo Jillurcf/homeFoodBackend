@@ -10,6 +10,8 @@ interface User {
   username: string;
   email: string;
   phone?: string;
+  nidNumber?: string;
+  address?: string;
   role: string;
 }
 
@@ -50,7 +52,15 @@ export const loginThunk = createAsyncThunk(
 export const registerThunk = createAsyncThunk(
   "auth/register",
   async (
-    payload: { name: string; username: string; email: string; password: string; phone?: string },
+    payload: {
+      name: string;
+      username: string;
+      email: string;
+      password: string;
+      phone?: string;
+      nidNumber?: string;
+      address?: string;
+    },
     { rejectWithValue }
   ) => {
     try {

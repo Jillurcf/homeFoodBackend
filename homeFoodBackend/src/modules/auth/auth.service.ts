@@ -14,6 +14,8 @@ export const register = async (data: {
   email: string;
   password: string;
   phone?: string;
+  nidNumber?: string;
+  address?: string;
 }) => {
   const existingEmail = await authRepository.findUserByEmail(data.email);
   if (existingEmail) {
@@ -33,6 +35,8 @@ export const register = async (data: {
     email: data.email,
     password: hashedPassword,
     phone: data.phone,
+    nidNumber: data.nidNumber,
+    address: data.address,
     role: "buyer",
   });
 
@@ -42,7 +46,16 @@ export const register = async (data: {
   authEvents.emit("auth.user.registered", user);
 
   return {
-    user: { id: userId, name: user.name, username: user.username, email: user.email, phone: user.phone, role: user.role },
+    user: {
+      id: userId,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      nidNumber: user.nidNumber,
+      address: user.address,
+      role: user.role,
+    },
     token,
   };
 };
@@ -62,7 +75,16 @@ export const login = async (email: string, password: string) => {
   const token = generateToken(userId, user.role);
 
   return {
-    user: { id: userId, name: user.name, username: user.username, email: user.email, phone: user.phone, role: user.role },
+    user: {
+      id: userId,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      nidNumber: user.nidNumber,
+      address: user.address,
+      role: user.role,
+    },
     token,
   };
 };

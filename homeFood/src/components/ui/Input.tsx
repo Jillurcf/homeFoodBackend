@@ -15,6 +15,8 @@ interface InputProps extends TextInputProps {
   label?: string;
   hint?: string;
   error?: string;
+  required?: boolean;
+  rightAccessory?: React.ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
 }
@@ -23,6 +25,8 @@ export function Input({
   label,
   hint,
   error,
+  required,
+  rightAccessory,
   containerStyle,
   labelStyle,
   style,
@@ -38,12 +42,12 @@ export function Input({
       {label && (
         <Text style={[tw`mb-1.5 text-sm font-medium text-text`, labelStyle]}>
           {label}
-          {rest.required && <Text style={tw`text-red-text`}> *</Text>}
+          {required && <Text style={tw`text-red-text`}> *</Text>}
         </Text>
       )}
       <View
         style={[
-          tw`rounded-xl border bg-card px-3.5 py-2.5`,
+          tw`flex-row items-center rounded-xl border bg-card px-3.5 py-2.5`,
           focused ? tw`border-primary` : tw`border-borderStrong`,
           focused && {
             shadowColor: colors.primary,
@@ -68,8 +72,9 @@ export function Input({
           placeholderTextColor={placeholderTextColor}
           cursorColor={cursorColor}
           selectionColor={selectionColor}
-          style={[tw`w-full text-sm text-text font-body`, style]}
+          style={[tw`flex-1 text-sm text-text font-body`, style]}
         />
+        {rightAccessory}
       </View>
       {error ? (
         <Text style={tw`mt-1 text-xs text-red-text`}>{error}</Text>

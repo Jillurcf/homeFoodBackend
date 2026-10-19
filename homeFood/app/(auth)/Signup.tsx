@@ -1,244 +1,295 @@
-import { IconBack, IconCloseEye, IconEnvelope, iconLock, IconOpenEye, IconUser } from '@/assets/Icons/Icon';
-import Button from '@/src/components/Button';
-import InputText from '@/src/components/InputText';
-import tw from '@/src/lib/tailwind';
-import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import { Alert, Platform, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { SvgXml } from 'react-native-svg';
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store";
-import { registerThunk, clearError } from "@/src/store/authSlice";
+import { clearError, registerThunk } from "@/src/store/authSlice";
 import { api } from "@/src/api/clients";
+import { AuthShell, Input, PillButton } from "@/src/components/ui";
+import tw from "@/src/lib/tailwind";
+
+type FieldName =
+  | "name"
+  | "username"
+  | "email"
+  | "password"
+  | "mobile"
+  | "nidNumber"
+  | "address";
+
+type FieldErrors = Partial<Record<FieldName, string>>;
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken" | "error";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+const MOBILE_REGEX = /^\d{6,15}$/;
+const NID_REGEX = /^\d{10,17}$/;
 
 const Signup = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [username, setUsername] = useState<string>('');
-    const [name, setName] = useState<string>('');
-    const [isShowPassword, setIsShowPassword] = useState(false);
-    const [signupError, setSignupError] = useState<string | null>(null);
-    const [spaceError, setSpaceError] = useState<string | null>(null);
-    const [existingUserName, setExistingUserName] = useState<string>('');
-    const [passwordError, setPasswordError] = useState<string | null>(null);
-    const [mobileNo, setMobileNo] = useState<string>('')
+  const dispatch = useDispatch<AppDispatch>();
+  const { isLoading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
 
-    const { screenName } = useLocalSearchParams();
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [nidNumber, setNidNumber] = useState("");
+  const [address, setAddress] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            router.replace('/(drawer)/(tabs)');
-        }
-    }, [isAuthenticated]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated]);
 
-    useEffect(() => {
-        return () => { dispatch(clearError()); };
-    }, [dispatch]);
-
-    // Validation for email format
-    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-    // Validation for password
-    const validatePassword = () => {
-        if (password.length < 6) {
-            setPasswordError('Password must be at least 6 characters long.');
-            return false;
-        }
-        setPasswordError(null);
-        return true;
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
     };
+  }, [dispatch]);
 
-    // Check username (prevent spaces)
-    const handleUsernameChange = async (text: string) => {
-        if (text.includes(' ')) {
-            setSpaceError('Username cannot contain spaces.');
-            setUsername('');
-            setExistingUserName('');
-            return;
-        } else {
-            setSpaceError(null);
-            setUsername(text);
-        }
+  useEffect(() => {
+    const value = username.trim();
+    if (!value || !USERNAME_REGEX.test(value)) {
+      setUsernameStatus("idle");
+      return;
+    }
 
-        if (text) {
-            setExistingUserName('Checking username...');
-            try {
-                const json = await api.post<{ success: boolean; data: { available: boolean } }>(
-                    "/auth/check-username",
-                    { username: text }
-                );
-                if (json.data.available) {
-                    setExistingUserName('Username is available.');
-                } else {
-                    setExistingUserName('Username already exists. Please choose another.');
-                }
-            } catch {
-                setExistingUserName('Error checking username.');
-            }
-        } else {
-            setExistingUserName('');
-        }
-    };
+    setUsernameStatus("checking");
+    const handle = setTimeout(async () => {
+      try {
+        const json = await api.post<{ success: boolean; data: { available: boolean } }>(
+          "/auth/check-username",
+          { username: value }
+        );
+        setUsernameStatus(json.data.available ? "available" : "taken");
+      } catch {
+        setUsernameStatus("error");
+      }
+    }, 400);
 
-    const allFilled = email.trim() !== '' && password.trim() !== '' && username.trim() !== '' && name.trim() !== '';
+    return () => clearTimeout(handle);
+  }, [username]);
 
-    const handleSignup = async () => {
-        if (isLoading) return;
+  const updateField = (field: FieldName, setter: (value: string) => void) => (value: string) => {
+    setter(value);
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  };
 
-        setSignupError(null);
+  const validate = (): FieldErrors => {
+    const next: FieldErrors = {};
 
-        if (!allFilled) {
-            Alert.alert('Error', 'Please fill all required fields.');
-            return;
-        }
+    if (!name.trim()) {
+      next.name = "Please enter your full name.";
+    }
+    if (!username.trim()) {
+      next.username = "Please enter a username.";
+    } else if (!USERNAME_REGEX.test(username.trim())) {
+      next.username = "Username can only contain letters, numbers and underscores.";
+    }
+    if (!email.trim()) {
+      next.email = "Please enter your email.";
+    } else if (!EMAIL_REGEX.test(email.trim())) {
+      next.email = "Please enter a valid email address.";
+    }
+    if (password.length < 6) {
+      next.password = "Password must be at least 6 characters long.";
+    }
+    if (!MOBILE_REGEX.test(mobile.trim())) {
+      next.mobile = "Please enter a valid mobile number.";
+    }
+    if (!NID_REGEX.test(nidNumber.trim())) {
+      next.nidNumber = "Please enter a valid NID number (10 to 17 digits).";
+    }
+    if (!address.trim()) {
+      next.address = "Please enter your present address.";
+    }
 
-        if (!validatePassword()) return;
-        if (!isValidEmail(email)) {
-            setSignupError('Please enter a valid email.');
-            return;
-        }
+    return next;
+  };
 
-        if (existingUserName === "Username already exists. Please choose another.") return;
+  const handleSignup = () => {
+    if (isLoading) return;
 
-        dispatch(registerThunk({ name, username, email, password, phone: mobileNo || undefined }));
-    };
+    if (usernameStatus === "taken") {
+      setErrors((prev) => ({
+        ...prev,
+        username: "Username already exists. Please choose another.",
+      }));
+      return;
+    }
 
-    return (
-        <KeyboardAwareScrollView
-            style={tw`flex-1 px-[4%] bg-black`}
-            keyboardShouldPersistTaps="handled"
-            extraKeyboardSpace={Platform.OS === 'ios' ? 100 : 0}
-        >
-            <View style={tw`mt-4`}>
-                {/* Header */}
-                <View style={tw`flex-row w-full justify-between items-center`}>
-                    <TouchableOpacity onPress={() => router.back()} style={tw`bg-black rounded-full p-1`}>
-                        <SvgXml xml={IconBack} />
-                    </TouchableOpacity>
-                    <Text style={tw`text-white font-AvenirLTProBlack text-2xl`}>Register</Text>
-                    <View style={tw`w-8`} />
-                </View>
+    const next = validate();
+    if (Object.keys(next).length > 0) {
+      setErrors(next);
+      return;
+    }
 
-                {/* Intro Text */}
-                <Text style={tw`text-primary text-xl font-AvenirLTProBlack mt-6`}>
-                    We are delighted that you are here
-                </Text>
-
-
-                {/* Form */}
-                <View style={tw`mt-[6%]`}>
-                    {/* Name & Username */}
-                    <View style={tw`flex-row gap-2 w-full`}>
-                        <View style={tw`w-[50%]`}>
-                            <InputText
-                                style={tw`text-white`}
-                                cursorColor="white"
-                                containerStyle={tw`bg-[#262329] h-14 border border-[#565358]`}
-                                labelStyle={tw`text-white font-AvenirLTProBlack`}
-                                placeholder="Write here"
-                                placeholderColor="#949494"
-                                label="Name"
-                                iconRight={IconUser}
-                                onChangeText={setName}
-                            />
-                        </View>
-                        <View style={tw`w-[50%]`}>
-                            <InputText
-                                cursorColor="white"
-                                style={tw`text-white`}
-                                containerStyle={tw`bg-[#262329] h-14 border border-[#565358]`}
-                                labelStyle={tw`text-white font-AvenirLTProBlack`}
-                                placeholder="Write here"
-                                placeholderColor="#949494"
-                                label="User name"
-                                iconRight={IconUser}
-                                onChangeText={handleUsernameChange}
-                            />
-                            {spaceError && <Text style={tw`text-red-600 text-xs`}>{spaceError}*</Text>}
-                            {existingUserName && (
-                                <Text style={tw`text-xs ${existingUserName.includes('available') ? 'text-green-600' : 'text-red-600'}`}>
-                                    {existingUserName}*
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    {/* Email */}
-                    <InputText
-                        cursorColor="white"
-                        style={tw`text-white`}
-                        containerStyle={tw`bg-[#262329] h-14 border border-[#565358] mt-3`}
-                        labelStyle={tw`text-white font-AvenirLTProBlack`}
-                        placeholder="Write it here"
-                        placeholderColor="#949494"
-                        label="Email"
-                        iconLeft={IconEnvelope}
-                        onChangeText={setEmail}
-                    />
-
-                    {/* Password */}
-                    <InputText
-                        cursorColor="white"
-                        style={tw`text-white`}
-                        containerStyle={tw`bg-[#262329] h-14 border border-[#565358] mt-3`}
-                        labelStyle={tw`text-white font-AvenirLTProBlack`}
-                        placeholder="Write it here"
-                        placeholderColor="#949494"
-                        label="Password"
-                        iconLeft={iconLock}
-                        iconRight={isShowPassword ? IconOpenEye : IconCloseEye}
-                        isShowPassword={isShowPassword}
-                        rightIconPress={() => setIsShowPassword(!isShowPassword)}
-                        onChangeText={setPassword}
-                    />
-                    {/* Mobile number */}
-                    <InputText
-                        cursorColor="white"
-                        style={tw`text-white`}
-                        containerStyle={tw`bg-[#262329] h-14 border border-[#565358] mt-3`}
-                        labelStyle={tw`text-white font-AvenirLTProBlack`}
-                        placeholder="Write it here"
-                        placeholderColor="#949494"
-                        label="Mobile no."
-                        // iconLeft={icon}
-                        // iconRight={isShowPassword ? IconOpenEye : IconCloseEye}
-                        // isShowPassword={isShowPassword}
-                        // rightIconPress={() => setIsShowPassword(!isShowPassword)}
-                        onChangeText={setMobileNo}
-                    />
-                    {passwordError && <Text style={tw`text-red-600 text-xs`}>{passwordError}*</Text>}
-
-                    {/* Error messages */}
-                    {signupError && <Text style={tw`text-red-600 text-xs text-center mt-2`}>{signupError}*</Text>}
-                    {!signupError && error && <Text style={tw`text-red-600 text-xs text-center mt-2`}>{error}*</Text>}
-                </View>
-
-                {/* Submit Button */}
-                <View style={tw`mt-4`}>
-                    <Button
-                        disabled={!allFilled || isLoading}
-                        title={isLoading ? 'Wait...' : 'Register'}
-                        style={tw`${allFilled ? 'text-black' : 'text-gray-500'} font-AvenirLTProBlack items-center`}
-                        containerStyle={tw`${allFilled ? 'bg-white' : 'bg-PrimaryFocus'} mt-4 h-14 rounded-2xl justify-center`}
-                        onPress={handleSignup}
-                    />
-                </View>
-            </View>
-            <View style={tw`flex-row gap-1 mt-[2%]`}>
-                <Text style={tw`text-white text-xs font-AvenirLTProBlack`}>Already have an account please </Text>
-                <TouchableOpacity onPress={() => router.push({ pathname: "/(auth)/login", params: { screenName: "Login" } })}>
-                    <Text style={tw`text-gray-400 text-xs underline font-AvenirLTProBlack`}>Login</Text>
-                </TouchableOpacity>
-
-            </View>
-            <StatusBar backgroundColor="black" translucent={false} />
-        </KeyboardAwareScrollView>
+    setErrors({});
+    dispatch(
+      registerThunk({
+        name: name.trim(),
+        username: username.trim(),
+        email: email.trim(),
+        password,
+        phone: mobile.trim() || undefined,
+        nidNumber: nidNumber.trim(),
+        address: address.trim(),
+      })
     );
+  };
+
+  const usernameError =
+    errors.username ||
+    (usernameStatus === "taken"
+      ? "Username already exists. Please choose another."
+      : undefined);
+
+  const usernameHint =
+    usernameStatus === "checking"
+      ? "Checking username..."
+      : usernameStatus === "available"
+        ? "Username is available."
+        : usernameStatus === "error"
+          ? "Error checking username."
+          : undefined;
+
+  const allFilled =
+    name.trim() !== "" &&
+    username.trim() !== "" &&
+    email.trim() !== "" &&
+    password !== "" &&
+    mobile.trim() !== "" &&
+    nidNumber.trim() !== "" &&
+    address.trim() !== "";
+
+  return (
+    <AuthShell
+      title="Register"
+      subtitle="Join the HomeFood community"
+      footer={
+        <View style={tw`flex-row items-center justify-center gap-1.5`}>
+          <Text style={tw`text-sm text-textMuted`}>Already have an account?</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/login")}
+            accessibilityRole="button"
+          >
+            <Text style={tw`text-sm font-semibold text-text underline`}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      }
+    >
+      {error ? (
+        <View style={tw`mb-3 rounded-xl bg-red-bg px-3 py-2`}>
+          <Text style={tw`text-center text-sm font-medium text-red-text`}>{error}</Text>
+        </View>
+      ) : null}
+
+      <View style={tw`gap-3`}>
+        <Input
+          label="Full Name"
+          placeholder="Your full name"
+          value={name}
+          onChangeText={updateField("name", setName)}
+          autoComplete="name"
+          textContentType="name"
+          error={errors.name}
+        />
+
+        <Input
+          label="Username"
+          placeholder="Choose a username"
+          value={username}
+          onChangeText={updateField("username", setUsername)}
+          autoCapitalize="none"
+          autoCorrect={false}
+          error={usernameError}
+          hint={usernameHint}
+        />
+
+        <Input
+          label="Email"
+          placeholder="you@example.com"
+          value={email}
+          onChangeText={updateField("email", setEmail)}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          error={errors.email}
+        />
+
+        <Input
+          label="Password"
+          placeholder="At least 6 characters"
+          value={password}
+          onChangeText={updateField("password", setPassword)}
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          textContentType="password"
+          rightAccessory={
+            <TouchableOpacity
+              onPress={() => setShowPassword((value) => !value)}
+              accessibilityRole="button"
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+            >
+              <Text style={tw`ml-2 text-sm font-semibold text-primary`}>
+                {showPassword ? "Hide" : "Show"}
+              </Text>
+            </TouchableOpacity>
+          }
+          error={errors.password}
+        />
+
+        <Input
+          label="Mobile Number"
+          placeholder="e.g. 01XXXXXXXXX"
+          value={mobile}
+          onChangeText={updateField("mobile", setMobile)}
+          keyboardType="phone-pad"
+          textContentType="telephoneNumber"
+          error={errors.mobile}
+        />
+
+        <Input
+          label="NID Number"
+          placeholder="10 to 17 digits"
+          value={nidNumber}
+          onChangeText={updateField("nidNumber", setNidNumber)}
+          keyboardType="number-pad"
+          error={errors.nidNumber}
+        />
+
+        <Input
+          label="Present Address"
+          placeholder="Your present address"
+          value={address}
+          onChangeText={updateField("address", setAddress)}
+          multiline
+          numberOfLines={3}
+          style={tw`min-h-16`}
+          textAlignVertical="top"
+          error={errors.address}
+        />
+      </View>
+
+      <PillButton
+        title="Register"
+        onPress={handleSignup}
+        loading={isLoading}
+        disabled={!allFilled}
+        fullWidth
+        style={tw`mt-5`}
+      />
+    </AuthShell>
+  );
 };
 
 export default Signup;
-
-const styles = StyleSheet.create({});

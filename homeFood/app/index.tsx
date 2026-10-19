@@ -20,7 +20,7 @@ export default function Index() {
 
     const timer = setTimeout(() => {
       router.replace(
-        isAuthenticated ? "/(drawer)/(tabs)" : "/(auth)/login"
+        isAuthenticated ? "/(tabs)" : "/(auth)/login"
       );
     }, 200);
 

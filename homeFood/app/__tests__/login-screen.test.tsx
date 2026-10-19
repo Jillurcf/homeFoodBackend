@@ -324,7 +324,7 @@ describe('Login Screen', () => {
   // Navigation on successful login
   // -----------------------------------------------------------------------
   describe('navigation on success', () => {
-    it('should navigate to drawer when isAuthenticated becomes true', () => {
+    it('should navigate to tabs when isAuthenticated becomes true', () => {
       // Start not authenticated
       mockState.auth.isAuthenticated = false;
       const { rerender } = render(<Login />);
@@ -333,7 +333,7 @@ describe('Login Screen', () => {
       mockState.auth.isAuthenticated = true;
       rerender(<Login />);
 
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
 
     it('should not navigate when not authenticated', () => {

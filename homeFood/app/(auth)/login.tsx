@@ -1,222 +1,128 @@
-import { router } from 'expo-router';
-import React, { useState, useEffect } from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
-} from 'react-native';
+import { router } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/src/store";
-import { loginThunk, clearError } from "@/src/store/authSlice";
+import { clearError, loginThunk } from "@/src/store/authSlice";
+import { AuthShell, Input, PillButton } from "@/src/components/ui";
+import tw from "@/src/lib/tailwind";
 
 const Login = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isShowPassword, setIsShowPassword] = useState(false);
+  const { isLoading, error, isAuthenticated } = useSelector(
+    (state: RootState) => state.auth
+  );
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(drawer)/(tabs)');
+      router.replace("/(tabs)");
     }
-
-    console.log(isAuthenticated, "isAuthenticated in login screen ===============")
   }, [isAuthenticated]);
 
   useEffect(() => {
-    return () => { dispatch(clearError()); };
+    return () => {
+      dispatch(clearError());
+    };
   }, [dispatch]);
 
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const allFilled = email.trim() !== "" && password !== "";
+  const displayError = formError ?? error;
+
   const handleLogin = () => {
-    dispatch(loginThunk({ email, password }));
+    if (isLoading) return;
+
+    if (!allFilled) {
+      setFormError("Please enter both your email and password.");
+      return;
+    }
+    if (!isValidEmail(email.trim())) {
+      setFormError("Please enter a valid email address.");
+      return;
+    }
+
+    setFormError(null);
+    dispatch(loginThunk({ email: email.trim(), password }));
   };
 
-  const allFilled = email.trim() !== '' && password.trim() !== '';
-
   return (
-    <View style={styles.container}>
-      <View style={styles.topSection}>
-        <View style={styles.logoContainer}>
-          <Image
-            source={require('../../assets/images/logo3.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
-
-        <Text style={styles.title}>Please Login</Text>
-
-        <View style={styles.inputWrapper}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Write it here"
-            placeholderTextColor="#949494"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-
-          <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Write it here"
-            placeholderTextColor="#949494"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!isShowPassword}
-          />
-          <TouchableOpacity onPress={() => setIsShowPassword(!isShowPassword)} style={styles.eyeButton}>
-            <Text style={styles.eyeText}>{isShowPassword ? 'Hide' : 'Show'}</Text>
+    <AuthShell
+      title="Login"
+      subtitle="Welcome back to HomeFood"
+      footer={
+        <View style={tw`flex-row items-center justify-center gap-1.5`}>
+          <Text style={tw`text-sm text-textMuted`}>Don&apos;t have an account?</Text>
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/Signup")}
+            accessibilityRole="button"
+          >
+            <Text style={tw`text-sm font-semibold text-text underline`}>Register</Text>
           </TouchableOpacity>
         </View>
-
-        <View style={styles.row}>
-          <Text style={styles.textSmall}>
-            Do not have an account please{' '}
+      }
+    >
+      {displayError ? (
+        <View style={tw`mb-3 rounded-xl bg-red-bg px-3 py-2`}>
+          <Text style={tw`text-center text-sm font-medium text-red-text`}>
+            {displayError}
           </Text>
-          <TouchableOpacity onPress={() => router.push({ pathname: '/(auth)/Signup', params: { screenName: 'signup' } })}>
-            <Text style={styles.linkText}>Signup</Text>
-          </TouchableOpacity>
         </View>
+      ) : null}
 
-        <View style={styles.rowWrap}>
-          <Text style={styles.textSmall}>By logging in you accept our </Text>
-          <TouchableOpacity><Text style={styles.linkText}>TOS</Text></TouchableOpacity>
-          <Text style={styles.textSmall}>&</Text>
-          <TouchableOpacity><Text style={styles.linkText}>PP</Text></TouchableOpacity>
-        </View>
+      <View style={tw`gap-3`}>
+        <Input
+          label="Email"
+          placeholder="you@example.com"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            setFormError(null);
+          }}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          textContentType="emailAddress"
+        />
 
-        <TouchableOpacity onPress={() => router.push({ pathname: '/(auth)/EmailVerification', params: { screenName: 'forgetPass' } })}>
-          <Text style={styles.forgotPassword}>Forget password</Text>
-        </TouchableOpacity>
-
-        {error && <Text style={styles.errorText}>{error}</Text>}
+        <Input
+          label="Password"
+          placeholder="Your password"
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            setFormError(null);
+          }}
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          textContentType="password"
+          rightAccessory={
+            <TouchableOpacity
+              onPress={() => setShowPassword((value) => !value)}
+              accessibilityRole="button"
+              accessibilityLabel={showPassword ? "Hide password" : "Show password"}
+            >
+              <Text style={tw`ml-2 text-sm font-semibold text-primary`}>
+                {showPassword ? "Hide" : "Show"}
+              </Text>
+            </TouchableOpacity>
+          }
+        />
       </View>
 
-      <View style={styles.bottomSection}>
-        <TouchableOpacity
-          style={[styles.button, (!allFilled || isLoading) && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={!allFilled || isLoading}
-        >
-          <Text style={styles.buttonText}>{isLoading ? 'Wait...' : 'Continue'}</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+      <PillButton
+        title="Login"
+        onPress={handleLogin}
+        loading={isLoading}
+        disabled={!allFilled}
+        fullWidth
+        style={tw`mt-5`}
+      />
+    </AuthShell>
   );
 };
 
 export default Login;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: '4%',
-    justifyContent: 'space-between',
-    paddingVertical: 20,
-  },
-  topSection: {
-    marginTop: 10,
-  },
-  logoContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logo: {
-    width: 150,
-    height: 150,
-  },
-  title: {
-    textAlign: 'center',
-    color: '#000',
-    fontSize: 22,
-    fontWeight: '700',
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  inputWrapper: {
-    marginTop: 10,
-  },
-  label: {
-    color: '#000',
-    fontWeight: '600',
-    marginTop: 10,
-    marginBottom: 4,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderColor: '#F36C26',
-    height: 48,
-    color: '#000',
-    fontSize: 16,
-    paddingVertical: 4,
-  },
-  eyeButton: {
-    alignSelf: 'flex-end',
-    marginTop: -32,
-    marginRight: 4,
-  },
-  eyeText: {
-    color: '#F36C26',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  row: {
-    flexDirection: 'row',
-    gap: 4,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  rowWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  textSmall: {
-    fontSize: 12,
-    color: '#000',
-  },
-  linkText: {
-    fontSize: 12,
-    color: '#888',
-    textDecorationLine: 'underline',
-  },
-  forgotPassword: {
-    marginTop: 16,
-    color: '#000',
-    fontWeight: '600',
-  },
-  errorText: {
-    marginTop: 12,
-    color: 'red',
-    textAlign: 'center',
-    fontSize: 14,
-  },
-  bottomSection: {
-    marginVertical: 40,
-  },
-  button: {
-    backgroundColor: '#F36C26',
-    height: 48,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#000',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-});

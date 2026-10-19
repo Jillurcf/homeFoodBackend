@@ -1,4 +1,5 @@
 export { AvailabilityPill, type Availability } from "./AvailabilityPill";
+export { AuthShell } from "./AuthShell";
 export { Card } from "./Card";
 export { Chip } from "./Chip";
 export { EmptyState } from "./EmptyState";

@@ -339,14 +339,14 @@ describe('Signup Screen', () => {
   // Navigation on successful registration
   // -----------------------------------------------------------------------
   describe('navigation on success', () => {
-    it('should navigate to drawer when isAuthenticated becomes true', () => {
+    it('should navigate to tabs when isAuthenticated becomes true', () => {
       mockState.auth.isAuthenticated = false;
       const { rerender } = render(<Signup />);
 
       mockState.auth.isAuthenticated = true;
       rerender(<Signup />);
 
-      expect(mockReplace).toHaveBeenCalledWith('/(drawer)/(tabs)');
+      expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
     });
 
     it('should not navigate when not authenticated', () => {
