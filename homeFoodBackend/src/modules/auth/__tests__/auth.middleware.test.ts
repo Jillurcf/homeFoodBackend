@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 // Mock env BEFORE importing the middleware
-vi.mock("../../config/env", () => ({
+vi.mock("../../../config/env", () => ({
   env: {
     JWT_SECRET: "test-secret",
     BCRYPT_SALT_ROUNDS: 10,
@@ -76,6 +76,32 @@ describe("authenticate middleware", () => {
     authenticate(req, res, next);
 
     expect(req.user!.role).toBe("admin");
+  });
+
+  it("should reject a token without a user id", () => {
+    const token = jwt.sign({ role: "buyer" }, "test-secret", {
+      expiresIn: "1h",
+    });
+    const { req, res, next } = createMockReqRes();
+    req.headers = { authorization: `Bearer ${token}` };
+
+    authenticate(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("should reject a token with an unsupported role", () => {
+    const token = jwt.sign({ id: "user-123", role: "guest" }, "test-secret", {
+      expiresIn: "1h",
+    });
+    const { req, res, next } = createMockReqRes();
+    req.headers = { authorization: `Bearer ${token}` };
+
+    authenticate(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
   });
 
   // ---- Missing / malformed header ----------------------------------------

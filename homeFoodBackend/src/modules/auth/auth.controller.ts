@@ -33,6 +33,16 @@ export const getMe = async (req: AuthRequest, res: Response) => {
   }
 };
 
+export const refreshSession = async (req: AuthRequest, res: Response) => {
+  try {
+    const result = await authService.refreshSession(req.user!.id);
+    return res.json({ success: true, data: result });
+  } catch (err: any) {
+    const status = err.status || 500;
+    return res.status(status).json({ success: false, message: err.message });
+  }
+};
+
 export const checkUsername = async (req: Request, res: Response) => {
   try {
     const result = await authService.checkUsername(req.body.username);

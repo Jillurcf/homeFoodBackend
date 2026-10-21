@@ -8,6 +8,8 @@ export interface IUser extends Document {
   phone?: string;
   nidNumber?: string;
   address?: string;
+  avatarUrl?: string;
+  isVerified?: boolean;
   role: "buyer" | "seller" | "admin";
 }
 
@@ -20,6 +22,8 @@ const userSchema = new Schema<IUser>(
     phone: { type: String },
     nidNumber: { type: String },
     address: { type: String },
+    avatarUrl: { type: String, default: "" },
+    isVerified: { type: Boolean, default: false },
     role: {
       type: String,
       enum: ["buyer", "seller", "admin"],

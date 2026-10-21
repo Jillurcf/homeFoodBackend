@@ -20,7 +20,20 @@ export const authenticate = (
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, env.JWT_SECRET) as { id: string; role: string };
+    const decoded = jwt.verify(token, env.JWT_SECRET);
+    if (
+      typeof decoded !== "object" ||
+      decoded === null ||
+      typeof decoded.id !== "string" ||
+      decoded.id.length === 0 ||
+      typeof decoded.role !== "string" ||
+      !["buyer", "seller", "admin"].includes(decoded.role)
+    ) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid or expired token" });
+    }
+
     req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch {

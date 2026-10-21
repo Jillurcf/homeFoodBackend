@@ -97,6 +97,26 @@ export const getMe = async (userId: string) => {
   return user;
 };
 
+export const refreshSession = async (userId: string) => {
+  const user = await authRepository.findUserById(userId);
+  if (!user) {
+    throw { status: 404, message: "User not found" };
+  }
+
+  return {
+    user: {
+      id: user._id.toString(),
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      role: user.role,
+    },
+    token: generateToken(user._id.toString(), user.role),
+  };
+};
+
 export const checkUsername = async (username: string) => {
   const existing = await authRepository.findUserByUsername(username);
   return { available: !existing };
