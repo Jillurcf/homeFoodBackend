@@ -164,6 +164,7 @@ export const ordersApi = createApi({
       query: (orderId) => `/orders/${orderId}`,
       transformResponse: (response: { success: boolean; data: RawOrder }) =>
         mapOrder(response.data),
+      providesTags: ["Orders"],
     }),
     updateOrderStatus: builder.mutation<
       Order,
@@ -178,6 +179,15 @@ export const ordersApi = createApi({
         mapOrder(response.data),
       invalidatesTags: ["Orders"],
     }),
+    receiveOrder: builder.mutation<Order, string>({
+      query: (orderId) => ({
+        url: `/orders/${orderId}/receive`,
+        method: "POST",
+      }),
+      transformResponse: (response: { success: boolean; data: RawOrder }) =>
+        mapOrder(response.data),
+      invalidatesTags: ["Orders"],
+    }),
   }),
 });
 
@@ -186,4 +196,5 @@ export const {
   useGetSellerOrdersQuery,
   useGetOrderByIdQuery,
   useUpdateOrderStatusMutation,
+  useReceiveOrderMutation,
 } = ordersApi;

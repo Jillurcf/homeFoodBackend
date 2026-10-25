@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   STATUS_META,
@@ -10,24 +10,29 @@ import {
   paymentMethodLabel,
   shortOrderId,
   useGetOrderByIdQuery,
+  useReceiveOrderMutation,
   type Order,
   type OrderStatus,
 } from "@/src/api/orders";
+import { notificationsApi } from "@/src/api/notifications";
 import {
   Card,
   EmptyState,
+  PillButton,
   Skeleton,
   StatusPill,
 } from "@/src/components/ui";
 import { colors } from "@/src/constants/theme";
 import { formatPrice } from "@/src/lib/browse";
 import tw from "@/src/lib/tailwind";
+import { useAppDispatch } from "@/src/store/hooks";
 
 type StepState = "done" | "current" | "todo";
 
 const TIMELINE_STEPS = [
   { label: "Order placed", icon: "receipt-outline" as const },
   { label: "Preparing", icon: "restaurant-outline" as const },
+  { label: "On the way", icon: "bicycle-outline" as const },
   { label: "Delivered", icon: "checkmark-done-outline" as const },
 ];
 
@@ -37,10 +42,11 @@ function currentStepIndex(status: OrderStatus): number {
       return 0;
     case "CONFIRMED":
     case "PREPARING":
-    case "ON_THE_WAY":
       return 1;
-    case "DELIVERED":
+    case "ON_THE_WAY":
       return 2;
+    case "DELIVERED":
+      return 3;
     default:
       return -1;
   }
@@ -215,6 +221,8 @@ export default function OrderDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
+  const [receiveOrder, { isLoading: receiving }] = useReceiveOrderMutation();
 
   const { data: order, isLoading, isError } = useGetOrderByIdQuery(id ?? "", {
     skip: !id,
@@ -253,6 +261,24 @@ export default function OrderDetailScreen() {
   const meta = STATUS_META[order.status];
   const itemCount = orderItemCount(order);
 
+  const confirmReceipt = async () => {
+    try {
+      await receiveOrder(order.id).unwrap();
+      dispatch(
+        notificationsApi.util.invalidateTags([
+          "Notifications",
+          "NotificationsUnread",
+        ]),
+      );
+      Alert.alert("Order received", "Thanks for confirming delivery.");
+    } catch (err: any) {
+      Alert.alert(
+        "Unable to confirm",
+        err?.data?.message || "Something went wrong",
+      );
+    }
+  };
+
   return (
     <View style={tw`flex-1 bg-background`}>
       <ScrollView
@@ -286,6 +312,16 @@ export default function OrderDetailScreen() {
             {formatOrderDate(order.createdAt)} · {itemCount}{" "}
             {itemCount === 1 ? "item" : "items"}
           </Text>
+          {order.status === "ON_THE_WAY" && (
+            <View style={tw`mt-3 border-t border-border pt-3`}>
+              <PillButton
+                title={receiving ? "Confirming..." : "I received my food"}
+                loading={receiving}
+                disabled={receiving}
+                onPress={confirmReceipt}
+              />
+            </View>
+          )}
           <View
             style={tw`mt-3 flex-row items-center justify-between border-t border-border pt-3`}
           >

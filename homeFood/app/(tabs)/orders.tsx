@@ -32,6 +32,7 @@ import {
 import { colors } from "@/src/constants/theme";
 import { formatPrice } from "@/src/lib/browse";
 import tw from "@/src/lib/tailwind";
+import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 
 function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   const meta = STATUS_META[order.status];
@@ -118,10 +119,15 @@ export default function OrdersScreen() {
 
   const header = (
     <View>
-      <Text style={tw`text-lg font-semibold text-text`}>My orders</Text>
-      <Text style={tw`mt-1 text-sm text-textMuted`}>
-        Track and review your past orders
-      </Text>
+      <View style={tw`flex-row items-center justify-between`}>
+        <View>
+          <Text style={tw`text-lg font-semibold text-text`}>My orders</Text>
+          <Text style={tw`mt-1 text-sm text-textMuted`}>
+            Track and review your past orders
+          </Text>
+        </View>
+        <NotificationBell />
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

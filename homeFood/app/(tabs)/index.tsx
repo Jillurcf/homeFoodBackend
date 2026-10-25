@@ -24,6 +24,7 @@ import tw from "@/src/lib/tailwind";
 import { toggleFavorite } from "@/src/store/favoritesSlice";
 import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import type { BrowseFilters, Food, SortValue } from "@/src/types/food";
+import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 
 const SKELETON_COUNT = 6;
 
@@ -141,11 +142,14 @@ export default function HomeBrowseScreen() {
     <View>
       {/* Header */}
       <View style={tw`pt-2 pb-5`}>
-        <Text
-          style={tw`text-xs font-semibold uppercase tracking-[0.16em] text-primaryDark font-bengali`}
-        >
-          স্থানীয় রান্নাঘর থেকে তাজা
-        </Text>
+        <View style={tw`flex-row items-center justify-between`}>
+          <Text
+            style={tw`text-xs font-semibold uppercase tracking-[0.16em] text-primaryDark font-bengali`}
+          >
+            স্থানীয় রান্নাঘর থেকে তাজা
+          </Text>
+          <NotificationBell />
+        </View>
         <Text
           style={tw`mt-2 text-3xl font-semibold tracking-tight text-text font-bengali`}
         >

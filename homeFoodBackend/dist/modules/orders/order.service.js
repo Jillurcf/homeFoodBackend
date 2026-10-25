@@ -36,9 +36,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.adminUpdateStatus = exports.updateStatus = exports.sellerOwnsOrder = exports.getAllOrders = exports.getSellerOrders = exports.getUserOrders = exports.getOrderById = exports.createOrder = void 0;
+exports.adminUpdateStatus = exports.receiveOrder = exports.updateStatus = exports.sellerOwnsOrder = exports.getAllOrders = exports.getSellerOrders = exports.getUserOrders = exports.getOrderById = exports.createOrder = void 0;
 const orderRepository = __importStar(require("./order.repository"));
 const order_events_1 = __importDefault(require("./order.events"));
+const notificationService = __importStar(require("../notifications/notification.service"));
+const notifyOrderPlaced = async (order) => {
+    try {
+        await notificationService.notifyOrderPlaced(order);
+    }
+    catch (error) {
+        console.error("Failed to notify sellers about a new order:", error);
+    }
+};
+const notifyOrderStatusChange = async (order, previousStatus, actorId) => {
+    try {
+        await notificationService.notifyOrderStatusChange(order, previousStatus, actorId);
+    }
+    catch (error) {
+        console.error("Failed to notify order participants:", error);
+    }
+};
 const createOrder = async (payload, userId) => {
     const order = await orderRepository.createOrder({
         ...payload,
@@ -51,6 +68,7 @@ const createOrder = async (payload, userId) => {
         })),
     });
     order_events_1.default.emit("order.created", order);
+    await notifyOrderPlaced(order);
     return order;
 };
 exports.createOrder = createOrder;
@@ -77,7 +95,7 @@ exports.sellerOwnsOrder = sellerOwnsOrder;
 const ALLOWED_TRANSITIONS = {
     PENDING: ["PREPARING", "CANCELLED"],
     CONFIRMED: ["PREPARING", "CANCELLED"],
-    PREPARING: ["DELIVERED", "CANCELLED"],
+    PREPARING: ["ON_THE_WAY", "CANCELLED"],
     ON_THE_WAY: ["DELIVERED"],
     DELIVERED: [],
     CANCELLED: [],
@@ -93,6 +111,12 @@ const updateStatus = async (orderId, status, sellerId) => {
             throw { status: 403, message: "You cannot update this order" };
         }
     }
+    if (sellerId && status === "DELIVERED") {
+        throw {
+            status: 400,
+            message: "Only the buyer can confirm that an order was received",
+        };
+    }
     const allowed = ALLOWED_TRANSITIONS[existing.status] ?? [];
     if (!allowed.includes(status)) {
         throw {
@@ -101,17 +125,48 @@ const updateStatus = async (orderId, status, sellerId) => {
         };
     }
     const updated = await orderRepository.updateOrderStatus(orderId, status);
-    order_events_1.default.emit("order.status.updated", updated);
+    if (!updated) {
+        throw { status: 404, message: "Order not found" };
+    }
+    order_events_1.default.emit("order.status.updated", updated, existing.status, sellerId);
+    await notifyOrderStatusChange(updated, existing.status, sellerId);
     return updated;
 };
 exports.updateStatus = updateStatus;
+const receiveOrder = async (orderId, buyerId) => {
+    const existing = await orderRepository.findOrderById(orderId);
+    if (!existing) {
+        throw { status: 404, message: "Order not found" };
+    }
+    if (String(existing.userId) !== buyerId) {
+        throw { status: 403, message: "You cannot confirm this order" };
+    }
+    if (existing.status !== "ON_THE_WAY") {
+        throw {
+            status: 400,
+            message: `Cannot confirm receipt while the order is ${existing.status}`,
+        };
+    }
+    const updated = await orderRepository.updateOrderStatus(orderId, "DELIVERED");
+    if (!updated) {
+        throw { status: 404, message: "Order not found" };
+    }
+    order_events_1.default.emit("order.status.updated", updated, existing.status, buyerId);
+    await notifyOrderStatusChange(updated, existing.status, buyerId);
+    return updated;
+};
+exports.receiveOrder = receiveOrder;
 const adminUpdateStatus = async (orderId, status) => {
     const existing = await orderRepository.findOrderById(orderId);
     if (!existing) {
         throw { status: 404, message: "Order not found" };
     }
     const updated = await orderRepository.updateOrderStatus(orderId, status);
-    order_events_1.default.emit("order.status.updated", updated);
+    if (!updated) {
+        throw { status: 404, message: "Order not found" };
+    }
+    order_events_1.default.emit("order.status.updated", updated, existing.status);
+    await notifyOrderStatusChange(updated, existing.status);
     return updated;
 };
 exports.adminUpdateStatus = adminUpdateStatus;

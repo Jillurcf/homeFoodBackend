@@ -42,6 +42,7 @@ router.post("/", auth_middleware_1.authenticate, orderController.createOrder);
 router.get("/my-orders", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("buyer"), orderController.getMyOrders);
 router.get("/seller-orders", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("seller", "admin"), orderController.getSellerOrders);
 router.get("/:orderId", auth_middleware_1.authenticate, orderController.getOrderById);
+router.post("/:orderId/receive", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("buyer"), orderController.receiveOrder);
 router.patch("/:orderId/status", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("seller", "admin"), orderController.updateStatus);
 exports.default = router;
 //# sourceMappingURL=order.routes.js.map

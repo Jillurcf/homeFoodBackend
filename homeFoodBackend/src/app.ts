@@ -1,15 +1,13 @@
 import express from "express";
 import cors from "cors";
-import mongoose from "mongoose";
 import path from "path";
-import { env } from "./config/env";
 import authRoutes from "./modules/auth/auth.routes";
 import orderRoutes from "./modules/orders/order.routes";
 import foodRoutes from "./modules/foods/food.routes";
 import reviewRoutes from "./modules/reviews/review.routes";
 import foodMakerRoutes from "./modules/foodMakers/foodMaker.routes";
 import adminRoutes from "./modules/admin/admin.routes";
-import { registerEvents } from "./bootstrap/events";
+import notificationRoutes from "./modules/notifications/notification.routes";
 const app = express();
 
 // Middleware
@@ -29,25 +27,11 @@ app.use("/api/foods", foodRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/shops", foodMakerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // Root route
 app.get("/", (_, res) => {
   res.json({ message: "HomeFood Backend is running 🚀" });
 });
-
-// MongoDB connection
-// mongoose.connect(env.MONGO_URI)
-//   .then(() => console.log("MongoDB connected ✅"))
-//   .catch(err => console.error("MongoDB connection error:", err));
-
-mongoose.connect(env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected ✅");
-
-    // 👇 IMPORTANT: register events after DB connection
-    registerEvents();
-  })
-  .catch(err => console.error("MongoDB connection error:", err));
-
 
 export default app;

@@ -25,6 +25,7 @@ import {
 import { colors } from "@/src/constants/theme";
 import { formatPrice } from "@/src/lib/browse";
 import tw from "@/src/lib/tailwind";
+import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 
 const SEA_GREEN = "#047857";
 const AMBER = "#B45309";
@@ -152,6 +153,9 @@ export default function SellerDashboardScreen() {
           { paddingTop: insets.top + 12 },
         ]}
       >
+        <View style={tw`mb-4 flex-row items-center justify-end`}>
+          <NotificationBell />
+        </View>
         <DashboardSkeleton />
       </View>
     );
@@ -345,7 +349,7 @@ export default function SellerDashboardScreen() {
           icon="checkmark-done-outline"
           label="Completed"
           value={String(stats?.completed ?? 0)}
-          sub="delivered so far"
+          sub="confirmed by buyers"
           tint={SEA_GREEN}
           tintBg="rgba(16,185,129,0.14)"
         />

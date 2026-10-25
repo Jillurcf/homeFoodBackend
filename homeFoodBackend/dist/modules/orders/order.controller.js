@@ -36,7 +36,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateStatus = exports.getSellerOrders = exports.getMyOrders = exports.getOrderById = exports.createOrder = void 0;
+exports.updateStatus = exports.receiveOrder = exports.getSellerOrders = exports.getMyOrders = exports.getOrderById = exports.createOrder = void 0;
 const orderService = __importStar(require("./order.service"));
 const order_validation_1 = require("./order.validation");
 const zod_1 = require("zod");
@@ -150,6 +150,25 @@ const getSellerOrders = async (req, res) => {
     }
 };
 exports.getSellerOrders = getSellerOrders;
+const receiveOrder = async (req, res) => {
+    try {
+        const user = getAuthenticatedUser(req, res);
+        if (!user)
+            return;
+        const order = await orderService.receiveOrder(req.params.orderId, user.id);
+        return res.json({
+            success: true,
+            data: order,
+        });
+    }
+    catch (err) {
+        return res.status(err.status || 500).json({
+            success: false,
+            message: err.message,
+        });
+    }
+};
+exports.receiveOrder = receiveOrder;
 const updateStatus = async (req, res) => {
     try {
         const { status } = order_validation_1.updateOrderStatusSchema.parse(req.body);

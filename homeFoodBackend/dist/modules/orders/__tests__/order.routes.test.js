@@ -52,6 +52,7 @@ vitest_1.vi.mock("../order.service", () => ({
     getAllOrders: vitest_1.vi.fn(),
     sellerOwnsOrder: vitest_1.vi.fn(),
     updateStatus: vitest_1.vi.fn(),
+    receiveOrder: vitest_1.vi.fn(),
 }));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -75,6 +76,7 @@ function tokenFor(id, role) {
         vitest_1.vi.mocked(orderService.sellerOwnsOrder).mockResolvedValue(false);
         vitest_1.vi.mocked(orderService.createOrder).mockResolvedValue(order);
         vitest_1.vi.mocked(orderService.updateStatus).mockResolvedValue(order);
+        vitest_1.vi.mocked(orderService.receiveOrder).mockResolvedValue(order);
     });
     (0, vitest_1.it)("requires buyers to access their own order list", async () => {
         const guest = await (0, supertest_1.default)(app).get("/api/orders/my-orders");
@@ -187,6 +189,34 @@ function tokenFor(id, role) {
             .send({ status: "PREPARING" });
         (0, vitest_1.expect)(response.status).toBe(200);
         (0, vitest_1.expect)(orderService.updateStatus).toHaveBeenCalledWith(order._id.toString(), "PREPARING", undefined);
+    });
+    (0, vitest_1.it)("requires a buyer to confirm receipt", async () => {
+        const guest = await (0, supertest_1.default)(app).post(`/api/orders/${order._id}/receive`);
+        const seller = await (0, supertest_1.default)(app)
+            .post(`/api/orders/${order._id}/receive`)
+            .set("Authorization", `Bearer ${tokenFor("seller-1", "seller")}`);
+        (0, vitest_1.expect)(guest.status).toBe(401);
+        (0, vitest_1.expect)(seller.status).toBe(403);
+        (0, vitest_1.expect)(orderService.receiveOrder).not.toHaveBeenCalled();
+    });
+    (0, vitest_1.it)("confirms receipt for the authenticated buyer", async () => {
+        const response = await (0, supertest_1.default)(app)
+            .post(`/api/orders/${order._id}/receive`)
+            .set("Authorization", `Bearer ${tokenFor("buyer-1", "buyer")}`);
+        (0, vitest_1.expect)(response.status).toBe(200);
+        (0, vitest_1.expect)(orderService.receiveOrder).toHaveBeenCalledWith(order._id.toString(), "buyer-1");
+    });
+    (0, vitest_1.it)("propagates receipt ownership and status failures", async () => {
+        vitest_1.vi.mocked(orderService.receiveOrder).mockRejectedValueOnce(Object.assign(new Error("You cannot confirm this order"), { status: 403 }));
+        const nonOwner = await (0, supertest_1.default)(app)
+            .post(`/api/orders/${order._id}/receive`)
+            .set("Authorization", `Bearer ${tokenFor("buyer-2", "buyer")}`);
+        vitest_1.vi.mocked(orderService.receiveOrder).mockRejectedValueOnce(Object.assign(new Error("Cannot confirm receipt"), { status: 400 }));
+        const wrongStatus = await (0, supertest_1.default)(app)
+            .post(`/api/orders/${order._id}/receive`)
+            .set("Authorization", `Bearer ${tokenFor("buyer-1", "buyer")}`);
+        (0, vitest_1.expect)(nonOwner.status).toBe(403);
+        (0, vitest_1.expect)(wrongStatus.status).toBe(400);
     });
 });
 //# sourceMappingURL=order.routes.test.js.map

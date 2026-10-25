@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/src/constants/theme";
 import tw from "@/src/lib/tailwind";
 import { useAppSelector } from "@/src/store/hooks";
+import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 
 const SUPPORT_LINKS = [
   { icon: "information-circle-outline" as const, label: "About us", route: "/(stack)/marketing/about" },
@@ -53,12 +54,17 @@ export default function ProfileScreen() {
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={tw`font-display text-2xl font-semibold text-text`}>
-        Profile
-      </Text>
-      <Text style={tw`mt-1 text-sm text-textMuted`}>
-        {user ? `${user.name} · ${user.email}` : "Your account and support"}
-      </Text>
+      <View style={tw`flex-row items-center justify-between`}>
+        <View>
+          <Text style={tw`font-display text-2xl font-semibold text-text`}>
+            Profile
+          </Text>
+          <Text style={tw`mt-1 text-sm text-textMuted`}>
+            {user ? `${user.name} · ${user.email}` : "Your account and support"}
+          </Text>
+        </View>
+        <NotificationBell />
+      </View>
 
       <Text
         style={tw`mt-6 text-xs font-semibold uppercase tracking-wide text-textMuted`}

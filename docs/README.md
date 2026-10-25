@@ -65,6 +65,7 @@ app/
 
 ### Phase D — Finish
 14. **[14 Cleanup & polish](14-cleanup-polish.md)** — delete dead code, env config, lint
+15. **[15 Notifications & buyer receipt](15-notifications-order-receipt.md)** — in-app notification bell/API, seller and buyer alerts, buyer receipt confirmation, website checkout
 
 ## Rules
 

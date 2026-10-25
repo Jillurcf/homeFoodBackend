@@ -3,6 +3,7 @@ import { foodsApi } from "@/src/api/foods";
 import { ordersApi } from "@/src/api/orders";
 import { reviewsApi } from "@/src/api/reviews";
 import { shopsApi } from "@/src/api/shops";
+import { notificationsApi } from "@/src/api/notifications";
 import authReducer from "./authSlice";
 import favoritesReducer from "./favoritesSlice";
 
@@ -14,11 +15,15 @@ export const store = configureStore({
     [ordersApi.reducerPath]: ordersApi.reducer,
     [reviewsApi.reducerPath]: reviewsApi.reducer,
     [shopsApi.reducerPath]: shopsApi.reducer,
+    [notificationsApi.reducerPath]: notificationsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .concat(foodsApi.middleware, ordersApi.middleware)
-      .concat(reviewsApi.middleware, shopsApi.middleware),
+      .concat(foodsApi.middleware)
+      .concat(ordersApi.middleware)
+      .concat(reviewsApi.middleware)
+      .concat(shopsApi.middleware)
+      .concat(notificationsApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

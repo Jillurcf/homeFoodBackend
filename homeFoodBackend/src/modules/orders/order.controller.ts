@@ -197,6 +197,25 @@ export const getSellerOrders = async (req: Request, res: Response) => {
   }
 };
 
+export const receiveOrder = async (req: Request, res: Response) => {
+  try {
+    const user = getAuthenticatedUser(req, res);
+    if (!user) return;
+
+    const order = await orderService.receiveOrder(req.params.orderId, user.id);
+
+    return res.json({
+      success: true,
+      data: order,
+    });
+  } catch (err: any) {
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 export const updateStatus = async (req: Request, res: Response) => {
   try {
     const { status } = updateOrderStatusSchema.parse(req.body);

@@ -8,6 +8,7 @@ export default defineConfig({
       "src/modules/foodMakers/__tests__/**/*.test.ts",
       "src/modules/orders/__tests__/**/*.test.ts",
       "src/modules/admin/__tests__/**/*.test.ts",
+      "src/modules/notifications/__tests__/**/*.test.ts",
     ],
   },
 });

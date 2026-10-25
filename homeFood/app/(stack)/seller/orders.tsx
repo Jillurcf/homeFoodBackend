@@ -32,6 +32,7 @@ import {
 import { colors } from "@/src/constants/theme";
 import { formatPrice } from "@/src/lib/browse";
 import tw from "@/src/lib/tailwind";
+import { NotificationBell } from "@/src/components/notifications/NotificationBell";
 
 function orderClock(iso?: string) {
   if (!iso) return "";
@@ -188,16 +189,21 @@ function OrderRow({
 
           {isPreparing && (
             <PillButton
-              title="Mark as delivered"
+              title="Mark out for delivery"
               loading={updating}
               disabled={updating}
-              onPress={() => onChangeStatus("DELIVERED")}
+              onPress={() => onChangeStatus("ON_THE_WAY")}
             />
           )}
 
           {order.status === "DELIVERED" && (
             <Text style={tw`text-sm text-textFaint`}>
               This order is delivered and closed. Well done!
+            </Text>
+          )}
+          {order.status === "ON_THE_WAY" && (
+            <Text style={tw`text-sm text-textFaint`}>
+              Order is out for delivery. Waiting for the buyer to confirm receipt.
             </Text>
           )}
 
@@ -290,9 +296,10 @@ export default function SellerOrdersScreen() {
             Orders
           </Text>
           <Text style={tw`text-sm text-textMuted`}>
-            Accept, cook and deliver — you are in control.
+            Accept, cook and hand off — you are in control.
           </Text>
         </View>
+        <NotificationBell />
       </View>
 
       <ScrollView

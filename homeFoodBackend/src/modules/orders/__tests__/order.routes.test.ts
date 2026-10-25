@@ -15,6 +15,7 @@ vi.mock("../order.service", () => ({
   getAllOrders: vi.fn(),
   sellerOwnsOrder: vi.fn(),
   updateStatus: vi.fn(),
+  receiveOrder: vi.fn(),
 }));
 
 const app = express();
@@ -42,6 +43,7 @@ describe("order visibility routes", () => {
     vi.mocked(orderService.sellerOwnsOrder).mockResolvedValue(false);
     vi.mocked(orderService.createOrder).mockResolvedValue(order);
     vi.mocked(orderService.updateStatus).mockResolvedValue(order);
+    vi.mocked(orderService.receiveOrder).mockResolvedValue(order);
   });
 
   it("requires buyers to access their own order list", async () => {
@@ -191,5 +193,49 @@ describe("order visibility routes", () => {
       "PREPARING",
       undefined
     );
+  });
+
+  it("requires a buyer to confirm receipt", async () => {
+    const guest = await request(app).post(
+      `/api/orders/${order._id}/receive`
+    );
+    const seller = await request(app)
+      .post(`/api/orders/${order._id}/receive`)
+      .set("Authorization", `Bearer ${tokenFor("seller-1", "seller")}`);
+
+    expect(guest.status).toBe(401);
+    expect(seller.status).toBe(403);
+    expect(orderService.receiveOrder).not.toHaveBeenCalled();
+  });
+
+  it("confirms receipt for the authenticated buyer", async () => {
+    const response = await request(app)
+      .post(`/api/orders/${order._id}/receive`)
+      .set("Authorization", `Bearer ${tokenFor("buyer-1", "buyer")}`);
+
+    expect(response.status).toBe(200);
+    expect(orderService.receiveOrder).toHaveBeenCalledWith(
+      order._id.toString(),
+      "buyer-1"
+    );
+  });
+
+  it("propagates receipt ownership and status failures", async () => {
+    vi.mocked(orderService.receiveOrder).mockRejectedValueOnce(
+      Object.assign(new Error("You cannot confirm this order"), { status: 403 })
+    );
+    const nonOwner = await request(app)
+      .post(`/api/orders/${order._id}/receive`)
+      .set("Authorization", `Bearer ${tokenFor("buyer-2", "buyer")}`);
+
+    vi.mocked(orderService.receiveOrder).mockRejectedValueOnce(
+      Object.assign(new Error("Cannot confirm receipt"), { status: 400 })
+    );
+    const wrongStatus = await request(app)
+      .post(`/api/orders/${order._id}/receive`)
+      .set("Authorization", `Bearer ${tokenFor("buyer-1", "buyer")}`);
+
+    expect(nonOwner.status).toBe(403);
+    expect(wrongStatus.status).toBe(400);
   });
 });

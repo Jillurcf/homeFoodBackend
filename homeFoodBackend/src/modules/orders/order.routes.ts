@@ -23,6 +23,13 @@ router.get(
 
 router.get("/:orderId", authenticate, orderController.getOrderById);
 
+router.post(
+  "/:orderId/receive",
+  authenticate,
+  requireRole("buyer"),
+  orderController.receiveOrder
+);
+
 router.patch(
   "/:orderId/status",
   authenticate,

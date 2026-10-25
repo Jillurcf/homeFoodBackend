@@ -14,6 +14,7 @@ const food_routes_1 = __importDefault(require("./modules/foods/food.routes"));
 const review_routes_1 = __importDefault(require("./modules/reviews/review.routes"));
 const foodMaker_routes_1 = __importDefault(require("./modules/foodMakers/foodMaker.routes"));
 const admin_routes_1 = __importDefault(require("./modules/admin/admin.routes"));
+const notification_routes_1 = __importDefault(require("./modules/notifications/notification.routes"));
 const events_1 = require("./bootstrap/events");
 const app = (0, express_1.default)();
 // Middleware
@@ -28,6 +29,7 @@ app.use("/api/foods", food_routes_1.default);
 app.use("/api/reviews", review_routes_1.default);
 app.use("/api/shops", foodMaker_routes_1.default);
 app.use("/api/admin", admin_routes_1.default);
+app.use("/api/notifications", notification_routes_1.default);
 // Root route
 app.get("/", (_, res) => {
     res.json({ message: "HomeFood Backend is running 🚀" });
