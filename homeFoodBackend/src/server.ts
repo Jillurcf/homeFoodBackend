@@ -1,20 +1,26 @@
+
 import app from "./app";
 import { env } from "./config/env";
-import mongoose from "mongoose";
+import connectDB from "./config/db";
 import { registerEvents } from "./bootstrap/events";
 
 const startServer = async () => {
   try {
-    await mongoose.connect(env.MONGO_URI);
-    console.log("MongoDB connected ✅");
+    console.log("🚀 Starting HomeFood backend...");
+
+    await connectDB();
+
     registerEvents();
 
     app.listen(env.PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
+      console.log(
+        `✅ Server running at http://localhost:${env.PORT}`
+      );
+      console.log(`🌍 Environment: ${env.NODE_ENV}`);
     });
   } catch (error) {
-    console.error("MongoDB connection error:", error);
-    process.exitCode = 1;
+    console.error("❌ Server startup failed:", error);
+    process.exit(1);
   }
 };
 
