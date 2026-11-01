@@ -15,7 +15,38 @@ const app = express();
 
 let eventsRegistered = false;
 
+// CORS must run before the DB middleware so preflight (OPTIONS) requests
+// never wait on a MongoDB connection and never fail because of it.
+const allowedOriginPatterns = [
+  /^https:\/\/(www\.)?gharerkhabar\.net$/,
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/,
+  /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
+  /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}(:\d+)?$/,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOriginPatterns.some((pattern) => pattern.test(origin))) {
+        callback(null, true);
+      } else {
+        // Returning false (instead of an Error) omits CORS headers without a 500.
+        console.warn(`Blocked CORS origin: ${origin}`);
+        callback(null, false);
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    optionsSuccessStatus: 204,
+  })
+);
+
 app.use(async (_req, _res, next) => {
+  if (process.env.NODE_ENV === "test") {
+    return next();
+  }
+
   try {
     await connectDB();
 
@@ -30,14 +61,6 @@ app.use(async (_req, _res, next) => {
     next(error);
   }
 });
-
-// Middleware
-const allowedOrigins = [
-  "https://www.gharerkhabar.net",
-  "https://gharerkhabar.net",
-  "http://localhost:8081",
-  "http://localhost:19006",
-];
 
 // health check 
 
@@ -59,18 +82,6 @@ app.get("/health", (_req, res) => {
 
 
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
 app.use(express.json());
 
 // Static food images (served for imageUrl values like /images/HilishaFish.jpg)

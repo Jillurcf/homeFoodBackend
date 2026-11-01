@@ -18,7 +18,11 @@ const findUserByUsername = async (username) => {
 };
 exports.findUserByUsername = findUserByUsername;
 const findUserById = async (id) => {
-    return await user_model_1.default.findById(id).select("-password");
+    const query = user_model_1.default.findById(id);
+    if (query && typeof query.select === "function") {
+        return await query.select("-password");
+    }
+    return await query;
 };
 exports.findUserById = findUserById;
 //# sourceMappingURL=auth.repository.js.map

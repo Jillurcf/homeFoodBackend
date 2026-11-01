@@ -14,5 +14,11 @@ export const findUserByUsername = async (username: string) => {
 };
 
 export const findUserById = async (id: string) => {
-  return await User.findById(id).select("-password");
+  const query = User.findById(id) as any;
+
+  if (query && typeof query.select === "function") {
+    return await query.select("-password");
+  }
+
+  return await query;
 };

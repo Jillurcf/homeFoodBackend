@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+export interface ITermsAcceptanceRecord {
+  version: string;
+  acceptedAt: Date;
+}
+
 export interface IUser extends Document {
   name: string;
   username: string;
@@ -11,7 +16,19 @@ export interface IUser extends Document {
   avatarUrl?: string;
   isVerified?: boolean;
   role: "buyer" | "seller" | "admin";
+  termsAcceptance?: {
+    buyer?: ITermsAcceptanceRecord;
+    seller?: ITermsAcceptanceRecord;
+  };
 }
+
+const termsAcceptanceSchema = new Schema<ITermsAcceptanceRecord>(
+  {
+    version: { type: String, required: true },
+    acceptedAt: { type: Date, required: true },
+  },
+  { _id: false }
+);
 
 const userSchema = new Schema<IUser>(
   {
@@ -28,6 +45,10 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ["buyer", "seller", "admin"],
       default: "buyer",
+    },
+    termsAcceptance: {
+      buyer: { type: termsAcceptanceSchema },
+      seller: { type: termsAcceptanceSchema },
     },
   },
   { timestamps: true }

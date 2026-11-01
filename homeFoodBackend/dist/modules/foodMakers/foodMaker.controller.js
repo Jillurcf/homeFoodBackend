@@ -45,6 +45,12 @@ const handleError = (res, err) => {
             errors: err.issues,
         });
     }
+    if (err?.status) {
+        return res.status(err.status).json({
+            success: false,
+            message: err.message,
+        });
+    }
     if (err?.name === "CastError") {
         return res.status(404).json({ success: false, message: "Shop not found" });
     }

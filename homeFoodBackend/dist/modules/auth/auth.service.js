@@ -40,12 +40,22 @@ exports.checkUsername = exports.refreshSession = exports.getMe = exports.login =
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const env_1 = require("../../config/env");
+const terms_1 = require("../../config/terms");
 const authRepository = __importStar(require("./auth.repository"));
 const auth_events_1 = __importDefault(require("./auth.events"));
 const generateToken = (id, role) => {
     return jsonwebtoken_1.default.sign({ id, role }, env_1.env.JWT_SECRET, { expiresIn: "7d" });
 };
 const register = async (data) => {
+    const role = data.role ?? "buyer";
+    if (data.acceptedTerms !== undefined || data.termsVersion !== undefined) {
+        if (data.acceptedTerms !== true) {
+            throw { status: 400, message: "You must accept the terms and conditions" };
+        }
+        if (data.termsVersion !== terms_1.TERMS_VERSION) {
+            throw { status: 400, message: `Terms version must be ${terms_1.TERMS_VERSION}` };
+        }
+    }
     const existingEmail = await authRepository.findUserByEmail(data.email);
     if (existingEmail) {
         throw { status: 409, message: "Email already registered" };
@@ -63,7 +73,13 @@ const register = async (data) => {
         phone: data.phone,
         nidNumber: data.nidNumber,
         address: data.address,
-        role: "buyer",
+        role,
+        termsAcceptance: {
+            [role]: {
+                version: data.termsVersion ?? terms_1.TERMS_VERSION,
+                acceptedAt: new Date(),
+            },
+        },
     });
     const userId = user._id.toString();
     const token = generateToken(userId, user.role);

@@ -34,6 +34,10 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
+const termsAcceptanceSchema = new mongoose_1.Schema({
+    version: { type: String, required: true },
+    acceptedAt: { type: Date, required: true },
+}, { _id: false });
 const userSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     username: { type: String, required: true, unique: true },
@@ -48,6 +52,10 @@ const userSchema = new mongoose_1.Schema({
         type: String,
         enum: ["buyer", "seller", "admin"],
         default: "buyer",
+    },
+    termsAcceptance: {
+        buyer: { type: termsAcceptanceSchema },
+        seller: { type: termsAcceptanceSchema },
     },
 }, { timestamps: true });
 exports.default = mongoose_1.default.model("User", userSchema);

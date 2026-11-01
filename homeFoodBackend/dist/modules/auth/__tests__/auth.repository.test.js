@@ -35,10 +35,12 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 const vitest_1 = require("vitest");
 // Mock the User model before any imports
-const mockCreate = vitest_1.vi.fn();
-const mockFindOne = vitest_1.vi.fn();
-const mockFindById = vitest_1.vi.fn();
-vitest_1.vi.mock("../../model/user/user.model", () => ({
+const { mockCreate, mockFindOne, mockFindById } = vitest_1.vi.hoisted(() => ({
+    mockCreate: vitest_1.vi.fn(),
+    mockFindOne: vitest_1.vi.fn(),
+    mockFindById: vitest_1.vi.fn(),
+}));
+vitest_1.vi.mock("../../../model/user/user.model", () => ({
     default: {
         create: mockCreate,
         findOne: mockFindOne,

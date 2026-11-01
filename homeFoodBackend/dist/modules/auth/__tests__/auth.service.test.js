@@ -65,7 +65,7 @@ vitest_1.vi.mock("../auth.events", () => ({
         emit: vitest_1.vi.fn(),
     },
 }));
-vitest_1.vi.mock("../../config/env", () => ({
+vitest_1.vi.mock("../../../config/env", () => ({
     env: {
         JWT_SECRET: "test-secret",
         BCRYPT_SALT_ROUNDS: 10,

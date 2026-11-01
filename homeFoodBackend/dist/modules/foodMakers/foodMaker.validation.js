@@ -25,5 +25,7 @@ exports.kitchenSchema = zod_1.z.object({
 /** Full payload submitted on step 3 — Review & go live */
 exports.shopSchema = exports.aboutYouSchema.merge(exports.kitchenSchema).extend({
     nidNumber: zod_1.z.string().trim().optional(),
+    acceptedTerms: zod_1.z.boolean().optional(),
+    termsVersion: zod_1.z.string().optional(),
 });
 //# sourceMappingURL=foodMaker.validation.js.map

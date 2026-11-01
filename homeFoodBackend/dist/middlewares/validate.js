@@ -9,6 +9,7 @@ const validate = (schema) => (req, res, next) => {
             errors: result.error.flatten(),
         });
     }
+    req.body = result.data;
     next();
 };
 exports.validate = validate;

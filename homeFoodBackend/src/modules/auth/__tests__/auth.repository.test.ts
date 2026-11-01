@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the User model before any imports
-const mockCreate = vi.fn();
-const mockFindOne = vi.fn();
-const mockFindById = vi.fn();
+const { mockCreate, mockFindOne, mockFindById } = vi.hoisted(() => ({
+  mockCreate: vi.fn(),
+  mockFindOne: vi.fn(),
+  mockFindById: vi.fn(),
+}));
 
-vi.mock("../../model/user/user.model", () => ({
+vi.mock("../../../model/user/user.model", () => ({
   default: {
     create: mockCreate,
     findOne: mockFindOne,

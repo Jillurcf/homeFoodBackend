@@ -5,6 +5,7 @@ import Order from "../orders/order.model";
 import Food from "../foods/food.model";
 import Review from "../reviews/review.model";
 import User from "../../model/user/user.model";
+import { TERMS_VERSION } from "../../config/terms";
 
 export const getMyShop = async (userId: string) => {
   return await foodMakerRepository.findByUserId(userId);
@@ -13,11 +14,28 @@ export const getMyShop = async (userId: string) => {
 export const saveMyShop = async (userId: string, input: ShopInput) => {
   const existing = await foodMakerRepository.findByUserId(userId);
 
+  if (!existing) {
+    if (input.acceptedTerms !== true) {
+      throw { status: 400, message: "You must accept the seller terms and conditions" };
+    }
+    if (input.termsVersion !== TERMS_VERSION) {
+      throw { status: 400, message: `Terms version must be ${TERMS_VERSION}` };
+    }
+  }
+
   const shop = existing
     ? await foodMakerRepository.updateByUserId(userId, input)
     : await foodMakerRepository.createShop(userId, input);
 
-  await User.findByIdAndUpdate(userId, { role: "seller" });
+  const update: Record<string, unknown> = { role: "seller" };
+  if (input.acceptedTerms === true && input.termsVersion) {
+    update["termsAcceptance.seller"] = {
+      version: input.termsVersion,
+      acceptedAt: new Date(),
+    };
+  }
+
+  await User.findByIdAndUpdate(userId, update);
 
   return shop;
 };

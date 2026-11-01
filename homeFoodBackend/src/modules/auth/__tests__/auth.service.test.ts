@@ -32,7 +32,7 @@ vi.mock("../auth.events", () => ({
   },
 }));
 
-vi.mock("../../config/env", () => ({
+vi.mock("../../../config/env", () => ({
   env: {
     JWT_SECRET: "test-secret",
     BCRYPT_SALT_ROUNDS: 10,

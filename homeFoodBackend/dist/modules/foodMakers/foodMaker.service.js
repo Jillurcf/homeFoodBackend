@@ -42,16 +42,32 @@ const order_model_1 = __importDefault(require("../orders/order.model"));
 const food_model_1 = __importDefault(require("../foods/food.model"));
 const review_model_1 = __importDefault(require("../reviews/review.model"));
 const user_model_1 = __importDefault(require("../../model/user/user.model"));
+const terms_1 = require("../../config/terms");
 const getMyShop = async (userId) => {
     return await foodMakerRepository.findByUserId(userId);
 };
 exports.getMyShop = getMyShop;
 const saveMyShop = async (userId, input) => {
     const existing = await foodMakerRepository.findByUserId(userId);
+    if (!existing) {
+        if (input.acceptedTerms !== true) {
+            throw { status: 400, message: "You must accept the seller terms and conditions" };
+        }
+        if (input.termsVersion !== terms_1.TERMS_VERSION) {
+            throw { status: 400, message: `Terms version must be ${terms_1.TERMS_VERSION}` };
+        }
+    }
     const shop = existing
         ? await foodMakerRepository.updateByUserId(userId, input)
         : await foodMakerRepository.createShop(userId, input);
-    await user_model_1.default.findByIdAndUpdate(userId, { role: "seller" });
+    const update = { role: "seller" };
+    if (input.acceptedTerms === true && input.termsVersion) {
+        update["termsAcceptance.seller"] = {
+            version: input.termsVersion,
+            acceptedAt: new Date(),
+        };
+    }
+    await user_model_1.default.findByIdAndUpdate(userId, update);
     return shop;
 };
 exports.saveMyShop = saveMyShop;

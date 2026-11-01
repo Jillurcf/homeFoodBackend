@@ -14,11 +14,13 @@ const findById = async (id) => {
 };
 exports.findById = findById;
 const createShop = async (userId, data) => {
-    return await foodMaker_model_1.default.create({ ...data, userId });
+    const { acceptedTerms, termsVersion, ...shopData } = data;
+    return await foodMaker_model_1.default.create({ ...shopData, userId });
 };
 exports.createShop = createShop;
 const updateByUserId = async (userId, data) => {
-    return await foodMaker_model_1.default.findOneAndUpdate({ userId }, { $set: data }, { new: true, runValidators: true });
+    const { acceptedTerms, termsVersion, ...shopData } = data;
+    return await foodMaker_model_1.default.findOneAndUpdate({ userId }, { $set: shopData }, { new: true, runValidators: true });
 };
 exports.updateByUserId = updateByUserId;
 //# sourceMappingURL=foodMaker.repository.js.map

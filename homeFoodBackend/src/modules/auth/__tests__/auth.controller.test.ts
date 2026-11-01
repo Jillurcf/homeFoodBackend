@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 // ---------------------------------------------------------------------------
 
 // Mock the validate middleware to parse req.body directly (spec-correct behaviour)
-vi.mock("../../middlewares/validate", () => ({
+vi.mock("../../../middlewares/validate", () => ({
   validate: (schema: any) => (req: any, res: any, next: any) => {
     const result = schema.safeParse(req.body);
     if (!result.success) {
@@ -18,10 +18,12 @@ vi.mock("../../middlewares/validate", () => ({
 }));
 
 // Mock the auth service so we control all business logic responses
-const mockRegister = vi.fn();
-const mockLogin = vi.fn();
-const mockGetMe = vi.fn();
-const mockCheckUsername = vi.fn();
+const { mockRegister, mockLogin, mockGetMe, mockCheckUsername } = vi.hoisted(() => ({
+  mockRegister: vi.fn(),
+  mockLogin: vi.fn(),
+  mockGetMe: vi.fn(),
+  mockCheckUsername: vi.fn(),
+}));
 
 vi.mock("../auth.service", () => ({
   register: mockRegister,
@@ -31,7 +33,7 @@ vi.mock("../auth.service", () => ({
 }));
 
 // Mock environment config
-vi.mock("../../config/env", () => ({
+vi.mock("../../../config/env", () => ({
   env: {
     JWT_SECRET: "test-secret",
     BCRYPT_SALT_ROUNDS: 10,
@@ -42,14 +44,25 @@ vi.mock("../../config/env", () => ({
 }));
 
 // Mock mongoose to prevent actual database connection at import time
-vi.mock("mongoose", () => ({
-  default: {
-    connect: vi.fn().mockResolvedValue(undefined),
-    Schema: class MockSchema {},
-    model: vi.fn().mockReturnValue({}),
-  },
-  Schema: class MockSchema {},
-}));
+vi.mock("mongoose", () => {
+  class MockSchema {
+    static Types = { ObjectId: class MockObjectId {} };
+    constructor() {}
+    index() {
+      return this;
+    }
+  }
+
+  return {
+    default: {
+      connect: vi.fn().mockResolvedValue(undefined),
+      Schema: MockSchema,
+      model: vi.fn().mockReturnValue({}),
+      connection: { readyState: 1 },
+    },
+    Schema: MockSchema,
+  };
+});
 
 // ---------------------------------------------------------------------------
 // App import (triggers mongoose mock — DB connect is suppressed)
@@ -64,6 +77,8 @@ const validUser = {
   username: "john_doe",
   email: "john@example.com",
   password: "password123",
+  acceptedTerms: true,
+  termsVersion: "1.0",
 };
 
 const mockUserData = {

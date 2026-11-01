@@ -11,6 +11,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.parse(payload);
     expect(result).toMatchObject({
@@ -28,6 +30,8 @@ describe("registerSchema", () => {
       email: "jane@example.com",
       password: "securePass1",
       phone: "+1234567890",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.parse(payload);
     expect(result.phone).toBe("+1234567890");
@@ -39,6 +43,8 @@ describe("registerSchema", () => {
       username: "jane_123",
       email: "jane@example.com",
       password: "securePass1",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.parse(payload);
     expect(result.phone).toBeUndefined();
@@ -49,6 +55,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -63,6 +71,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -73,6 +83,8 @@ describe("registerSchema", () => {
       name: "John",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -87,6 +99,8 @@ describe("registerSchema", () => {
       username: "",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -98,6 +112,8 @@ describe("registerSchema", () => {
       username: "john doe",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -109,6 +125,8 @@ describe("registerSchema", () => {
       username: "john@doe!",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -120,6 +138,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "not-an-email",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -134,6 +154,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "12345",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -147,6 +169,8 @@ describe("registerSchema", () => {
       name: "John",
       username: "john_doe",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -157,6 +181,8 @@ describe("registerSchema", () => {
       name: "John",
       username: "john_doe",
       email: "john@example.com",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -168,6 +194,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "",
+      acceptedTerms: true,
+      termsVersion: "1.0",
     };
     const result = registerSchema.safeParse(payload);
     expect(result.success).toBe(false);
@@ -179,6 +207,8 @@ describe("registerSchema", () => {
       username: "john_doe",
       email: "john@example.com",
       password: "password123",
+      acceptedTerms: true,
+      termsVersion: "1.0",
       unknownField: "should be stripped",
     };
     const result = registerSchema.parse(payload);

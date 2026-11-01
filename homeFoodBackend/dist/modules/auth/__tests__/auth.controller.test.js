@@ -10,7 +10,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 // Mocks — must be declared before any imports that use them
 // ---------------------------------------------------------------------------
 // Mock the validate middleware to parse req.body directly (spec-correct behaviour)
-vitest_1.vi.mock("../../middlewares/validate", () => ({
+vitest_1.vi.mock("../../../middlewares/validate", () => ({
     validate: (schema) => (req, res, next) => {
         const result = schema.safeParse(req.body);
         if (!result.success) {
@@ -20,10 +20,12 @@ vitest_1.vi.mock("../../middlewares/validate", () => ({
     },
 }));
 // Mock the auth service so we control all business logic responses
-const mockRegister = vitest_1.vi.fn();
-const mockLogin = vitest_1.vi.fn();
-const mockGetMe = vitest_1.vi.fn();
-const mockCheckUsername = vitest_1.vi.fn();
+const { mockRegister, mockLogin, mockGetMe, mockCheckUsername } = vitest_1.vi.hoisted(() => ({
+    mockRegister: vitest_1.vi.fn(),
+    mockLogin: vitest_1.vi.fn(),
+    mockGetMe: vitest_1.vi.fn(),
+    mockCheckUsername: vitest_1.vi.fn(),
+}));
 vitest_1.vi.mock("../auth.service", () => ({
     register: mockRegister,
     login: mockLogin,
@@ -31,7 +33,7 @@ vitest_1.vi.mock("../auth.service", () => ({
     checkUsername: mockCheckUsername,
 }));
 // Mock environment config
-vitest_1.vi.mock("../../config/env", () => ({
+vitest_1.vi.mock("../../../config/env", () => ({
     env: {
         JWT_SECRET: "test-secret",
         BCRYPT_SALT_ROUNDS: 10,
@@ -41,16 +43,25 @@ vitest_1.vi.mock("../../config/env", () => ({
     },
 }));
 // Mock mongoose to prevent actual database connection at import time
-vitest_1.vi.mock("mongoose", () => ({
-    default: {
-        connect: vitest_1.vi.fn().mockResolvedValue(undefined),
-        Schema: class MockSchema {
+vitest_1.vi.mock("mongoose", () => {
+    class MockSchema {
+        constructor() { }
+        index() {
+            return this;
+        }
+    }
+    MockSchema.Types = { ObjectId: class MockObjectId {
+        } };
+    return {
+        default: {
+            connect: vitest_1.vi.fn().mockResolvedValue(undefined),
+            Schema: MockSchema,
+            model: vitest_1.vi.fn().mockReturnValue({}),
+            connection: { readyState: 1 },
         },
-        model: vitest_1.vi.fn().mockReturnValue({}),
-    },
-    Schema: class MockSchema {
-    },
-}));
+        Schema: MockSchema,
+    };
+});
 // ---------------------------------------------------------------------------
 // App import (triggers mongoose mock — DB connect is suppressed)
 // ---------------------------------------------------------------------------
@@ -63,6 +74,8 @@ const validUser = {
     username: "john_doe",
     email: "john@example.com",
     password: "password123",
+    acceptedTerms: true,
+    termsVersion: "1.0",
 };
 const mockUserData = {
     id: "user-123",

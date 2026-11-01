@@ -26,6 +26,8 @@ export const kitchenSchema = z.object({
 /** Full payload submitted on step 3 — Review & go live */
 export const shopSchema = aboutYouSchema.merge(kitchenSchema).extend({
   nidNumber: z.string().trim().optional(),
+  acceptedTerms: z.boolean().optional(),
+  termsVersion: z.string().optional(),
 });
 
 export type ShopInput = z.infer<typeof shopSchema>;

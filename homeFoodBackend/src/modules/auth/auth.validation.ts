@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TERMS_VERSION } from "../../config/terms";
 
 export const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -14,6 +15,16 @@ export const registerSchema = z.object({
     .regex(/^\d{10,17}$/, "NID number must be 10 to 17 digits")
     .optional(),
   address: z.string().min(1, "Address is required").optional(),
+  role: z.enum(["buyer", "seller"]).default("buyer"),
+  acceptedTerms: z
+    .boolean()
+    .refine((value) => value === true, "You must accept the terms and conditions"),
+  termsVersion: z
+    .string()
+    .refine(
+      (value) => value === TERMS_VERSION,
+      `Terms version must be ${TERMS_VERSION}`
+    ),
 });
 
 export const loginSchema = z.object({

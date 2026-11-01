@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { env } from "../../config/env";
+import { TERMS_VERSION } from "../../config/terms";
 import * as authRepository from "./auth.repository";
 import authEvents from "./auth.events";
 
@@ -16,7 +17,21 @@ export const register = async (data: {
   phone?: string;
   nidNumber?: string;
   address?: string;
+  role?: "buyer" | "seller";
+  acceptedTerms?: boolean;
+  termsVersion?: string;
 }) => {
+  const role = data.role ?? "buyer";
+
+  if (data.acceptedTerms !== undefined || data.termsVersion !== undefined) {
+    if (data.acceptedTerms !== true) {
+      throw { status: 400, message: "You must accept the terms and conditions" };
+    }
+    if (data.termsVersion !== TERMS_VERSION) {
+      throw { status: 400, message: `Terms version must be ${TERMS_VERSION}` };
+    }
+  }
+
   const existingEmail = await authRepository.findUserByEmail(data.email);
   if (existingEmail) {
     throw { status: 409, message: "Email already registered" };
@@ -37,7 +52,13 @@ export const register = async (data: {
     phone: data.phone,
     nidNumber: data.nidNumber,
     address: data.address,
-    role: "buyer",
+    role,
+    termsAcceptance: {
+      [role]: {
+        version: data.termsVersion ?? TERMS_VERSION,
+        acceptedAt: new Date(),
+      },
+    },
   });
 
   const userId = user._id.toString();
