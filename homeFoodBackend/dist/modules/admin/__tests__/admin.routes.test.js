@@ -46,6 +46,10 @@ const admin_routes_1 = __importDefault(require("../admin.routes"));
 vitest_1.vi.mock("../admin.service", () => ({
     getStats: vitest_1.vi.fn(),
     listUsers: vitest_1.vi.fn(),
+    getUser: vitest_1.vi.fn(),
+    createUser: vitest_1.vi.fn(),
+    updateUser: vitest_1.vi.fn(),
+    deleteUser: vitest_1.vi.fn(),
     changeUserRole: vitest_1.vi.fn(),
     listShops: vitest_1.vi.fn(),
     verifyShop: vitest_1.vi.fn(),
@@ -74,6 +78,10 @@ const id = "64c13ab08edf48a008793cac";
             ordersToday: 1,
         });
         vitest_1.vi.mocked(adminService.listUsers).mockResolvedValue([]);
+        vitest_1.vi.mocked(adminService.getUser).mockResolvedValue({ _id: id, name: "Jillur Rahman" });
+        vitest_1.vi.mocked(adminService.createUser).mockResolvedValue({ _id: id, name: "New User" });
+        vitest_1.vi.mocked(adminService.updateUser).mockResolvedValue({ _id: id, name: "Ismoth Ara", role: "seller" });
+        vitest_1.vi.mocked(adminService.deleteUser).mockResolvedValue({ _id: id });
         vitest_1.vi.mocked(adminService.changeUserRole).mockResolvedValue({ _id: id, role: "seller" });
         vitest_1.vi.mocked(adminService.listShops).mockResolvedValue([]);
         vitest_1.vi.mocked(adminService.verifyShop).mockResolvedValue({ _id: id, verified: true });
@@ -121,12 +129,44 @@ const id = "64c13ab08edf48a008793cac";
         const update = await (0, supertest_1.default)(app)
             .patch(`/api/admin/users/${id}`)
             .set("Authorization", `Bearer ${adminToken}`)
-            .send({ role: "seller" });
+            .send({ name: "Ismoth Ara", role: "seller" });
         (0, vitest_1.expect)(users.status).toBe(200);
         (0, vitest_1.expect)(adminService.listUsers).toHaveBeenCalledWith("seller");
         (0, vitest_1.expect)(invalid.status).toBe(400);
         (0, vitest_1.expect)(update.status).toBe(200);
-        (0, vitest_1.expect)(adminService.changeUserRole).toHaveBeenCalledWith(id, "seller");
+        (0, vitest_1.expect)(adminService.updateUser).toHaveBeenCalledWith(id, {
+            name: "Ismoth Ara",
+            role: "seller",
+        });
+    });
+    (0, vitest_1.it)("supports viewing, creating, and removing users", async () => {
+        const details = await (0, supertest_1.default)(app)
+            .get(`/api/admin/users/${id}`)
+            .set("Authorization", `Bearer ${adminToken}`);
+        const created = await (0, supertest_1.default)(app)
+            .post("/api/admin/users")
+            .set("Authorization", `Bearer ${adminToken}`)
+            .send({
+            name: "New User",
+            username: "newuser",
+            email: "new@example.com",
+            password: "secret123",
+        });
+        const removed = await (0, supertest_1.default)(app)
+            .delete(`/api/admin/users/${id}`)
+            .set("Authorization", `Bearer ${adminToken}`);
+        (0, vitest_1.expect)(details.status).toBe(200);
+        (0, vitest_1.expect)(adminService.getUser).toHaveBeenCalledWith(id);
+        (0, vitest_1.expect)(created.status).toBe(201);
+        (0, vitest_1.expect)(adminService.createUser).toHaveBeenCalledWith({
+            name: "New User",
+            username: "newuser",
+            email: "new@example.com",
+            password: "secret123",
+            role: "buyer",
+        });
+        (0, vitest_1.expect)(removed.status).toBe(200);
+        (0, vitest_1.expect)(adminService.deleteUser).toHaveBeenCalledWith(id);
     });
     (0, vitest_1.it)("can list and verify shops with a validated boolean", async () => {
         const invalid = await (0, supertest_1.default)(app)

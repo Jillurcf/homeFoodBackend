@@ -36,8 +36,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeOrderStatus = exports.listOrders = exports.removeFood = exports.editFood = exports.listFoods = exports.verifyShop = exports.listShops = exports.changeUserRole = exports.listUsers = exports.getStats = void 0;
+exports.changeOrderStatus = exports.listOrders = exports.removeFood = exports.editFood = exports.listFoods = exports.verifyShop = exports.listShops = exports.changeUserRole = exports.deleteUser = exports.updateUser = exports.createUser = exports.getUser = exports.listUsers = exports.getStats = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const env_1 = require("../../config/env");
 const adminRepository = __importStar(require("./admin.repository"));
 const admin_validation_1 = require("./admin.validation");
 const orderService = __importStar(require("../orders/order.service"));
@@ -46,10 +48,70 @@ const assertValidId = (id) => {
         throw Object.assign(new Error("Invalid ID"), { status: 400 });
     }
 };
+const conflict = (message) => Object.assign(new Error(message), { status: 409 });
+const assertEmailAvailable = async (email, excludeId) => {
+    const existing = await adminRepository.findUserByEmail(email);
+    if (existing && existing._id.toString() !== excludeId) {
+        throw conflict("Email already registered");
+    }
+};
+const assertUsernameAvailable = async (username, excludeId) => {
+    const existing = await adminRepository.findUserByUsername(username);
+    if (existing && existing._id.toString() !== excludeId) {
+        throw conflict("Username already taken");
+    }
+};
 const getStats = () => adminRepository.getStats();
 exports.getStats = getStats;
 const listUsers = (role) => adminRepository.findUsers(role);
 exports.listUsers = listUsers;
+const getUser = async (id) => {
+    assertValidId(id);
+    const user = await adminRepository.findUserById(id);
+    if (!user)
+        throw Object.assign(new Error("User not found"), { status: 404 });
+    return user;
+};
+exports.getUser = getUser;
+const createUser = async (input) => {
+    await assertEmailAvailable(input.email);
+    await assertUsernameAvailable(input.username);
+    const password = await bcrypt_1.default.hash(input.password, env_1.env.BCRYPT_SALT_ROUNDS);
+    return adminRepository.createUser({
+        name: input.name,
+        username: input.username,
+        email: input.email,
+        password,
+        phone: input.phone,
+        address: input.address,
+        role: input.role,
+    });
+};
+exports.createUser = createUser;
+const updateUser = async (id, fields) => {
+    assertValidId(id);
+    if (fields.email)
+        await assertEmailAvailable(fields.email, id);
+    if (fields.username)
+        await assertUsernameAvailable(fields.username, id);
+    const updates = { ...fields };
+    if (fields.password) {
+        updates.password = await bcrypt_1.default.hash(fields.password, env_1.env.BCRYPT_SALT_ROUNDS);
+    }
+    const user = await adminRepository.updateUser(id, updates);
+    if (!user)
+        throw Object.assign(new Error("User not found"), { status: 404 });
+    return user;
+};
+exports.updateUser = updateUser;
+const deleteUser = async (id) => {
+    assertValidId(id);
+    const user = await adminRepository.deleteUser(id);
+    if (!user)
+        throw Object.assign(new Error("User not found"), { status: 404 });
+    return user;
+};
+exports.deleteUser = deleteUser;
 const changeUserRole = async (id, role) => {
     assertValidId(id);
     const user = await adminRepository.updateUserRole(id, role);
@@ -65,6 +127,9 @@ const verifyShop = async (id, verified) => {
     const shop = await adminRepository.setShopVerification(id, verified);
     if (!shop)
         throw Object.assign(new Error("Shop not found"), { status: 404 });
+    if (shop.userId) {
+        await adminRepository.setUserVerification(shop.userId, verified);
+    }
     return shop;
 };
 exports.verifyShop = verifyShop;

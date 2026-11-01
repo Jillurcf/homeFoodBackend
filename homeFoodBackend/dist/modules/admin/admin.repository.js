@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findOrders = exports.deleteFood = exports.updateFood = exports.findFoods = exports.setShopVerification = exports.findShops = exports.updateUserRole = exports.findUsers = exports.getStats = void 0;
+exports.findOrders = exports.deleteFood = exports.updateFood = exports.findFoods = exports.setUserVerification = exports.setShopVerification = exports.findShops = exports.updateUserRole = exports.deleteUser = exports.updateUser = exports.createUser = exports.findUserByUsername = exports.findUserByEmail = exports.findUserById = exports.findUsers = exports.getStats = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const food_model_1 = __importDefault(require("../foods/food.model"));
 const foodMaker_model_1 = __importDefault(require("../foodMakers/foodMaker.model"));
@@ -30,6 +30,41 @@ const findUsers = async (role) => {
         .lean();
 };
 exports.findUsers = findUsers;
+const findUserById = async (id) => {
+    return user_model_1.default.findById(id)
+        .select("-password")
+        .lean();
+};
+exports.findUserById = findUserById;
+const findUserByEmail = async (email) => {
+    return user_model_1.default.findOne({ email }).select("_id").lean();
+};
+exports.findUserByEmail = findUserByEmail;
+const findUserByUsername = async (username) => {
+    return user_model_1.default.findOne({ username })
+        .select("_id")
+        .lean();
+};
+exports.findUserByUsername = findUserByUsername;
+const createUser = async (data) => {
+    const user = await user_model_1.default.create(data);
+    return user_model_1.default.findById(user._id)
+        .select("-password -nidNumber")
+        .lean();
+};
+exports.createUser = createUser;
+const updateUser = async (id, fields) => {
+    return user_model_1.default.findByIdAndUpdate(id, { $set: fields }, { new: true, runValidators: true })
+        .select("-password -nidNumber")
+        .lean();
+};
+exports.updateUser = updateUser;
+const deleteUser = async (id) => {
+    return user_model_1.default.findByIdAndDelete(id)
+        .select("-password -nidNumber")
+        .lean();
+};
+exports.deleteUser = deleteUser;
 const updateUserRole = async (id, role) => {
     return user_model_1.default.findByIdAndUpdate(id, { role }, { new: true, runValidators: true })
         .select("-password -nidNumber")
@@ -49,6 +84,14 @@ const setShopVerification = async (id, verified) => {
         .lean();
 };
 exports.setShopVerification = setShopVerification;
+const setUserVerification = async (userId, verified) => {
+    if (!mongoose_1.default.isValidObjectId(userId))
+        return null;
+    return user_model_1.default.findByIdAndUpdate(userId, { isVerified: verified })
+        .select("-password -nidNumber")
+        .lean();
+};
+exports.setUserVerification = setUserVerification;
 const findFoods = async (sellerId) => {
     const query = {};
     if (sellerId) {

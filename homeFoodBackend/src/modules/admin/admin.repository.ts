@@ -29,7 +29,7 @@ export const findUsers = async (role?: string) => {
 
 export const findUserById = async (id: string) => {
   return User.findById(id)
-    .select("-password -nidNumber")
+    .select("-password")
     .lean();
 };
 

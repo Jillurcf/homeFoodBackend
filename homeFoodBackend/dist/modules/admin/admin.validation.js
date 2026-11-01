@@ -1,12 +1,43 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateOrderStatusSchema = exports.orderListQuerySchema = exports.updateFoodSchema = exports.foodListQuerySchema = exports.verifyShopSchema = exports.updateUserRoleSchema = exports.userListQuerySchema = void 0;
+exports.updateOrderStatusSchema = exports.orderListQuerySchema = exports.updateFoodSchema = exports.foodListQuerySchema = exports.verifyShopSchema = exports.adminUpdateUserSchema = exports.adminCreateUserSchema = exports.updateUserRoleSchema = exports.userListQuerySchema = void 0;
 const zod_1 = require("zod");
 exports.userListQuerySchema = zod_1.z.object({
     role: zod_1.z.enum(["buyer", "seller", "admin"]).optional(),
 });
+const userRoleSchema = zod_1.z.enum(["buyer", "seller", "admin"]);
+const usernameSchema = zod_1.z
+    .string()
+    .trim()
+    .min(1, "Username is required")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores");
 exports.updateUserRoleSchema = zod_1.z.object({
-    role: zod_1.z.enum(["buyer", "seller", "admin"]),
+    role: userRoleSchema,
+});
+exports.adminCreateUserSchema = zod_1.z.object({
+    name: zod_1.z.string().trim().min(1, "Name is required"),
+    username: usernameSchema,
+    email: zod_1.z.string().trim().email("Invalid email address"),
+    password: zod_1.z.string().min(6, "Password must be at least 6 characters"),
+    phone: zod_1.z.string().trim().optional(),
+    address: zod_1.z.string().trim().optional(),
+    role: userRoleSchema.default("buyer"),
+});
+exports.adminUpdateUserSchema = zod_1.z
+    .object({
+    name: zod_1.z.string().trim().min(1, "Name is required").optional(),
+    username: usernameSchema.optional(),
+    email: zod_1.z.string().trim().email("Invalid email address").optional(),
+    password: zod_1.z
+        .string()
+        .min(6, "Password must be at least 6 characters")
+        .optional(),
+    phone: zod_1.z.string().trim().optional(),
+    address: zod_1.z.string().trim().optional(),
+    role: userRoleSchema.optional(),
+})
+    .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one user field must be provided",
 });
 exports.verifyShopSchema = zod_1.z.object({
     verified: zod_1.z.boolean(),

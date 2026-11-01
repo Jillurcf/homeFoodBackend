@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateOrderStatus = exports.listOrders = exports.deleteFood = exports.updateFood = exports.listFoods = exports.verifyShop = exports.listShops = exports.updateUserRole = exports.listUsers = exports.getStats = void 0;
+exports.updateOrderStatus = exports.listOrders = exports.deleteFood = exports.updateFood = exports.listFoods = exports.verifyShop = exports.listShops = exports.deleteUser = exports.updateUser = exports.createUser = exports.getUser = exports.listUsers = exports.getStats = void 0;
 const zod_1 = require("zod");
 const adminService = __importStar(require("./admin.service"));
 const admin_validation_1 = require("./admin.validation");
@@ -67,11 +67,20 @@ const listUsers = (req, res) => respond(res, () => {
     return adminService.listUsers(role);
 });
 exports.listUsers = listUsers;
-const updateUserRole = (req, res) => respond(res, () => {
-    const { role } = admin_validation_1.updateUserRoleSchema.parse(req.body);
-    return adminService.changeUserRole(req.params.id, role);
+const getUser = (req, res) => respond(res, () => adminService.getUser(req.params.id));
+exports.getUser = getUser;
+const createUser = (req, res) => respond(res, () => {
+    const input = admin_validation_1.adminCreateUserSchema.parse(req.body);
+    return adminService.createUser(input);
+}, 201);
+exports.createUser = createUser;
+const updateUser = (req, res) => respond(res, () => {
+    const input = admin_validation_1.adminUpdateUserSchema.parse(req.body);
+    return adminService.updateUser(req.params.id, input);
 });
-exports.updateUserRole = updateUserRole;
+exports.updateUser = updateUser;
+const deleteUser = (req, res) => respond(res, () => adminService.deleteUser(req.params.id));
+exports.deleteUser = deleteUser;
 const listShops = (_req, res) => respond(res, adminService.listShops);
 exports.listShops = listShops;
 const verifyShop = (req, res) => respond(res, () => {
