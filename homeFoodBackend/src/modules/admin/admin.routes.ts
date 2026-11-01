@@ -9,7 +9,10 @@ router.use(authenticate, requireRole("admin"));
 
 router.get("/stats", adminController.getStats);
 router.get("/users", adminController.listUsers);
-router.patch("/users/:id", adminController.updateUserRole);
+router.post("/users", adminController.createUser);
+router.get("/users/:id", adminController.getUser);
+router.patch("/users/:id", adminController.updateUser);
+router.delete("/users/:id", adminController.deleteUser);
 router.get("/shops", adminController.listShops);
 router.patch("/shops/:id/verify", adminController.verifyShop);
 router.get("/foods", adminController.listFoods);

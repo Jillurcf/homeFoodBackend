@@ -9,6 +9,10 @@ import adminRoutes from "../admin.routes";
 vi.mock("../admin.service", () => ({
   getStats: vi.fn(),
   listUsers: vi.fn(),
+  getUser: vi.fn(),
+  createUser: vi.fn(),
+  updateUser: vi.fn(),
+  deleteUser: vi.fn(),
   changeUserRole: vi.fn(),
   listShops: vi.fn(),
   verifyShop: vi.fn(),
@@ -41,6 +45,10 @@ describe("admin API routes", () => {
       ordersToday: 1,
     });
     vi.mocked(adminService.listUsers).mockResolvedValue([]);
+    vi.mocked(adminService.getUser).mockResolvedValue({ _id: id, name: "Jillur Rahman" } as never);
+    vi.mocked(adminService.createUser).mockResolvedValue({ _id: id, name: "New User" } as never);
+    vi.mocked(adminService.updateUser).mockResolvedValue({ _id: id, name: "Ismoth Ara", role: "seller" } as never);
+    vi.mocked(adminService.deleteUser).mockResolvedValue({ _id: id } as never);
     vi.mocked(adminService.changeUserRole).mockResolvedValue({ _id: id, role: "seller" } as never);
     vi.mocked(adminService.listShops).mockResolvedValue([]);
     vi.mocked(adminService.verifyShop).mockResolvedValue({ _id: id, verified: true } as never);
@@ -93,13 +101,47 @@ describe("admin API routes", () => {
     const update = await request(app)
       .patch(`/api/admin/users/${id}`)
       .set("Authorization", `Bearer ${adminToken}`)
-      .send({ role: "seller" });
+      .send({ name: "Ismoth Ara", role: "seller" });
 
     expect(users.status).toBe(200);
     expect(adminService.listUsers).toHaveBeenCalledWith("seller");
     expect(invalid.status).toBe(400);
     expect(update.status).toBe(200);
-    expect(adminService.changeUserRole).toHaveBeenCalledWith(id, "seller");
+    expect(adminService.updateUser).toHaveBeenCalledWith(id, {
+      name: "Ismoth Ara",
+      role: "seller",
+    });
+  });
+
+  it("supports viewing, creating, and removing users", async () => {
+    const details = await request(app)
+      .get(`/api/admin/users/${id}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+    const created = await request(app)
+      .post("/api/admin/users")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        name: "New User",
+        username: "newuser",
+        email: "new@example.com",
+        password: "secret123",
+      });
+    const removed = await request(app)
+      .delete(`/api/admin/users/${id}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(details.status).toBe(200);
+    expect(adminService.getUser).toHaveBeenCalledWith(id);
+    expect(created.status).toBe(201);
+    expect(adminService.createUser).toHaveBeenCalledWith({
+      name: "New User",
+      username: "newuser",
+      email: "new@example.com",
+      password: "secret123",
+      role: "buyer",
+    });
+    expect(removed.status).toBe(200);
+    expect(adminService.deleteUser).toHaveBeenCalledWith(id);
   });
 
   it("can list and verify shops with a validated boolean", async () => {

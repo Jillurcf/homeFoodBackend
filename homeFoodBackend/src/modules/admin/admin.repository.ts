@@ -27,6 +27,48 @@ export const findUsers = async (role?: string) => {
     .lean();
 };
 
+export const findUserById = async (id: string) => {
+  return User.findById(id)
+    .select("-password -nidNumber")
+    .lean();
+};
+
+export const findUserByEmail = async (email: string) => {
+  return User.findOne({ email }).select("_id").lean<{ _id: mongoose.Types.ObjectId }>();
+};
+
+export const findUserByUsername = async (username: string) => {
+  return User.findOne({ username })
+    .select("_id")
+    .lean<{ _id: mongoose.Types.ObjectId }>();
+};
+
+export const createUser = async (data: Record<string, unknown>) => {
+  const user = await User.create(data);
+  return User.findById(user._id)
+    .select("-password -nidNumber")
+    .lean();
+};
+
+export const updateUser = async (
+  id: string,
+  fields: Record<string, unknown>
+) => {
+  return User.findByIdAndUpdate(
+    id,
+    { $set: fields },
+    { new: true, runValidators: true }
+  )
+    .select("-password -nidNumber")
+    .lean();
+};
+
+export const deleteUser = async (id: string) => {
+  return User.findByIdAndDelete(id)
+    .select("-password -nidNumber")
+    .lean();
+};
+
 export const updateUserRole = async (
   id: string,
   role: "buyer" | "seller" | "admin"

@@ -2,11 +2,12 @@ import { Request, Response } from "express";
 import { ZodError } from "zod";
 import * as adminService from "./admin.service";
 import {
+  adminCreateUserSchema,
+  adminUpdateUserSchema,
   foodListQuerySchema,
   orderListQuerySchema,
   updateFoodSchema,
   updateOrderStatusSchema,
-  updateUserRoleSchema,
   userListQuerySchema,
   verifyShopSchema,
 } from "./admin.validation";
@@ -49,11 +50,27 @@ export const listUsers = (req: Request, res: Response) =>
     return adminService.listUsers(role);
   });
 
-export const updateUserRole = (req: Request, res: Response) =>
+export const getUser = (req: Request, res: Response) =>
+  respond(res, () => adminService.getUser(req.params.id));
+
+export const createUser = (req: Request, res: Response) =>
+  respond(
+    res,
+    () => {
+      const input = adminCreateUserSchema.parse(req.body);
+      return adminService.createUser(input);
+    },
+    201
+  );
+
+export const updateUser = (req: Request, res: Response) =>
   respond(res, () => {
-    const { role } = updateUserRoleSchema.parse(req.body);
-    return adminService.changeUserRole(req.params.id, role);
+    const input = adminUpdateUserSchema.parse(req.body);
+    return adminService.updateUser(req.params.id, input);
   });
+
+export const deleteUser = (req: Request, res: Response) =>
+  respond(res, () => adminService.deleteUser(req.params.id));
 
 export const listShops = (_req: Request, res: Response) =>
   respond(res, adminService.listShops);
