@@ -18,7 +18,12 @@ router.get(
 
 router.get("/:id", foodController.getFoodById);
 
-router.post("/", authenticate, foodController.createFood);
+router.post(
+  "/",
+  authenticate,
+  requireRole("seller", "admin"),
+  foodController.createFood
+);
 
 router.patch("/:id", authenticate, foodController.updateFood);
 
