@@ -60,6 +60,9 @@ export const registerThunk = createAsyncThunk(
       phone?: string;
       nidNumber?: string;
       address?: string;
+      role?: "buyer" | "seller";
+      acceptedTerms?: boolean;
+      termsVersion?: string;
     },
     { rejectWithValue }
   ) => {

@@ -67,9 +67,16 @@ app/
 14. **[14 Cleanup & polish](14-cleanup-polish.md)** — delete dead code, env config, lint
 15. **[15 Notifications & buyer receipt](15-notifications-order-receipt.md)** — in-app notification bell/API, seller and buyer alerts, buyer receipt confirmation, website checkout
 
+### Phase E — Legal & consent
+16. **[16 Terms content & public pages](16-terms-content-pages.md)** — Bangla buyer/seller T&C on web and mobile
+17. **[17 Registration role & consent](17-signup-role-consent.md)** — buyer/seller signup toggle + required acceptance
+18. **[18 Backend acceptance & seller onboarding](18-backend-consent-seller-onboarding.md)** — persist consent, require seller terms on shop creation
+19. **[19 Terms QA & rollout](19-terms-qa-rollout.md)** — test matrix, commands, safe deployment order
+
 ## Rules
 
 - Every milestone ends with `npm run lint` passing in `homeFood/`
 - New backend code follows the existing module pattern (`src/modules/orders/`)
 - No new UI without matching website reference (page/component named in the doc)
 - Hardcoded hex is banned after M01 — use theme tokens
+- When legal copy changes, bump `TERMS_VERSION` in both apps and the backend together

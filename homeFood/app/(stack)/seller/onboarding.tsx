@@ -45,6 +45,7 @@ const KITCHEN_TYPE_OPTIONS: { value: KitchenType; label: string }[] = [
 ];
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TERMS_VERSION = "1.0";
 
 interface ShopForm {
   fullName: string;
@@ -90,6 +91,8 @@ export default function SellerOnboardingScreen() {
 
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [consentError, setConsentError] = useState("");
   const [form, setForm] = useState<ShopForm>({
     fullName: user?.name ?? "",
     phone: user?.phone ?? "",
@@ -175,6 +178,12 @@ export default function SellerOnboardingScreen() {
     if (saving) return;
     setError("");
 
+    if (!acceptedTerms) {
+      setConsentError("বিক্রেতার শর্তাবলি পড়ে সম্মতি দিতে হবে।");
+      return;
+    }
+    setConsentError("");
+
     try {
       await saveShop({
         fullName: form.fullName.trim(),
@@ -188,6 +197,8 @@ export default function SellerOnboardingScreen() {
         address: form.address.trim(),
         areas: form.areas,
         openHours: form.openHours.trim() || undefined,
+        acceptedTerms: true,
+        termsVersion: TERMS_VERSION,
       }).unwrap();
 
       setIsShopAdded(true);
@@ -517,6 +528,38 @@ export default function SellerOnboardingScreen() {
                     team verifies it. You can start adding dishes right away.
                   </Text>
                 </View>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    const nextValue = !acceptedTerms;
+                    setAcceptedTerms(nextValue);
+                    if (nextValue) setConsentError("");
+                  }}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ selected: acceptedTerms }}
+                  style={tw`flex-row items-start gap-3 rounded-xl border border-border bg-background p-3`}
+                >
+                  <View
+                    style={[
+                      tw`mt-0.5 h-5 w-5 items-center justify-center rounded border`,
+                      acceptedTerms ? tw`border-primary bg-primary` : tw`border-borderStrong bg-card`,
+                    ]}
+                  >
+                    {acceptedTerms ? <Text style={tw`text-xs font-bold text-white`}>✓</Text> : null}
+                  </View>
+                  <View style={tw`flex-1`}>
+                    <Text style={tw`text-sm leading-6 text-text`}>
+                      আমি{" "}
+                      <Text onPress={() => router.push("/(stack)/marketing/terms/seller")} style={tw`font-semibold text-primary underline`}>
+                        বিক্রেতার শর্তাবলি
+                      </Text>
+                      {" "}পড়ে সম্মতি দিয়েছি।
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                {consentError ? (
+                  <Text style={tw`text-xs text-red-text`}>{consentError}</Text>
+                ) : null}
               </View>
             )}
 
@@ -550,6 +593,7 @@ export default function SellerOnboardingScreen() {
                 title={isEdit ? "Save changes" : "Finish & go live"}
                 onPress={handleFinish}
                 loading={saving}
+                disabled={!acceptedTerms}
                 style={tw`bg-success`}
                 textStyle={tw`text-white`}
               />

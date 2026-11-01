@@ -13,7 +13,13 @@ export default defineConfig({
   },
   server: {
     deps: {
-      inline: [/@testing-library\/react-native/, 'test-renderer', 'react-reconciler'],
+      inline: [
+        /@testing-library\/react-native/,
+        'test-renderer',
+        'react-reconciler',
+        'react-native',
+        'expo-router',
+      ],
     },
   },
   test: {
@@ -30,7 +36,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
-      'react-native': path.resolve(__dirname, 'test/react-native-mock.tsx'),
+      'react-native$': path.resolve(__dirname, 'test/react-native-mock.tsx'),
+      'expo-router$': path.resolve(__dirname, 'test/expo-router-mock.tsx'),
       'react-native-svg': path.resolve(__dirname, 'test/react-native-svg-mock.tsx'),
       'react-native-keyboard-controller': path.resolve(
         __dirname,

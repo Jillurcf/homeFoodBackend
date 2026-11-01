@@ -15,13 +15,30 @@ const SUPPORT_LINKS = [
   { icon: "mail-outline" as const, label: "Contact us", route: "/(stack)/marketing/contact" },
 ];
 
+const LEGAL_LINKS = [
+  {
+    icon: "document-text-outline" as const,
+    label: "ক্রেতার শর্তাবলি",
+    route: "/(stack)/marketing/terms/buyer",
+    bengali: true,
+  },
+  {
+    icon: "document-text-outline" as const,
+    label: "বিক্রেতার শর্তাবলি",
+    route: "/(stack)/marketing/terms/seller",
+    bengali: true,
+  },
+];
+
 function MenuRow({
   icon,
   label,
+  bengali,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
+  bengali?: boolean;
   onPress: () => void;
 }) {
   return (
@@ -35,7 +52,13 @@ function MenuRow({
       >
         <Ionicons name={icon} size={18} color={colors.primary} />
       </View>
-      <Text style={tw`flex-1 text-sm font-semibold text-text`}>{label}</Text>
+      <Text
+        style={tw`flex-1 text-sm font-semibold text-text ${
+          bengali ? "font-bengali" : ""
+        }`}
+      >
+        {label}
+      </Text>
       <Ionicons name="chevron-forward" size={16} color={colors.textMuted} />
     </Pressable>
   );
@@ -90,6 +113,23 @@ export default function ProfileScreen() {
             key={link.label}
             icon={link.icon}
             label={link.label}
+            onPress={() => router.push(link.route as never)}
+          />
+        ))}
+      </View>
+
+      <Text
+        style={tw`mt-6 text-xs font-semibold uppercase tracking-wide text-textMuted`}
+      >
+        Legal
+      </Text>
+      <View style={tw`mt-2 gap-2.5`}>
+        {LEGAL_LINKS.map((link) => (
+          <MenuRow
+            key={link.label}
+            icon={link.icon}
+            label={link.label}
+            bengali={link.bengali}
             onPress={() => router.push(link.route as never)}
           />
         ))}

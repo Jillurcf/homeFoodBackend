@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createUser, getUserByEmail, validatePassword } from "../modules/user/user.service";
+import { createUser, getUserByEmail, validatePassword } from "../modules/users/user.service";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 

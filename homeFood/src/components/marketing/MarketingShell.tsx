@@ -11,6 +11,7 @@ interface MarketingShellProps {
   subtitle?: string;
   bengaliOverline?: string;
   overline?: string;
+  bengaliTitle?: boolean;
   children: React.ReactNode;
 }
 
@@ -27,6 +28,7 @@ export function MarketingShell({
   subtitle,
   bengaliOverline,
   overline,
+  bengaliTitle,
   children,
 }: MarketingShellProps) {
   const insets = useSafeAreaInsets();
@@ -59,7 +61,11 @@ export function MarketingShell({
           {bengaliOverline ?? overline}
         </Text>
       )}
-      <Text style={tw`mt-2 font-display text-3xl font-semibold text-text`}>
+      <Text
+        style={tw`mt-2 text-3xl font-semibold text-text ${
+          bengaliTitle ? "font-bengali" : "font-display"
+        }`}
+      >
         {title}
       </Text>
       {subtitle && (
