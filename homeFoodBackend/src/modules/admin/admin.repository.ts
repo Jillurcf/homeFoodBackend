@@ -95,6 +95,13 @@ export const setShopVerification = async (id: string, verified: boolean) => {
     .lean();
 };
 
+export const setUserVerification = async (userId: string, verified: boolean) => {
+  if (!mongoose.isValidObjectId(userId)) return null;
+  return User.findByIdAndUpdate(userId, { isVerified: verified })
+    .select("-password -nidNumber")
+    .lean();
+};
+
 export const findFoods = async (sellerId?: string) => {
   const query: { sellerId?: mongoose.Types.ObjectId } = {};
   if (sellerId) {

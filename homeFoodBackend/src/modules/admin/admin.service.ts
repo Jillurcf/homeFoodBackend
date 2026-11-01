@@ -107,6 +107,11 @@ export const verifyShop = async (id: string, verified: boolean) => {
   assertValidId(id);
   const shop = await adminRepository.setShopVerification(id, verified);
   if (!shop) throw Object.assign(new Error("Shop not found"), { status: 404 });
+
+  if (shop.userId) {
+    await adminRepository.setUserVerification(shop.userId, verified);
+  }
+
   return shop;
 };
 
