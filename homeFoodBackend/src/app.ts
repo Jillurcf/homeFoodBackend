@@ -8,6 +8,7 @@ import reviewRoutes from "./modules/reviews/review.routes";
 import foodMakerRoutes from "./modules/foodMakers/foodMaker.routes";
 import adminRoutes from "./modules/admin/admin.routes";
 import notificationRoutes from "./modules/notifications/notification.routes";
+import contactRoutes from "./modules/contact/contact.routes";
 import  connectDB  from "./config/db";
 import { registerEvents } from "./bootstrap/events";
 import mongoose from "mongoose";
@@ -98,6 +99,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/shops", foodMakerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Root route
 app.get("/", (_, res) => {

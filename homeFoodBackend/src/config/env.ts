@@ -21,6 +21,7 @@ const SMTP_SECURE =
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
 const SMTP_FROM = process.env.SMTP_FROM || "HomeFood <no-reply@homefood.local>";
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "gharerkhabar.net@gmail.com";
 const APP_NAME = process.env.APP_NAME || "HomeFood";
 const OTP_TTL_MINUTES = process.env.OTP_TTL_MINUTES
   ? Number(process.env.OTP_TTL_MINUTES)
@@ -44,6 +45,7 @@ export const env = {
   SMTP_USER,
   SMTP_PASS,
   SMTP_FROM,
+  SUPPORT_EMAIL,
   APP_NAME,
   OTP_TTL_MINUTES,
   OTP_MAX_ATTEMPTS,

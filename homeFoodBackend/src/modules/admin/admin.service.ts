@@ -9,6 +9,7 @@ import {
   updateFoodSchema,
 } from "./admin.validation";
 import * as orderService from "../orders/order.service";
+import * as contactService from "../contact/contact.service";
 import { IOrder } from "../orders/order.model";
 
 type CreateUserInput = z.infer<typeof adminCreateUserSchema>;
@@ -140,3 +141,6 @@ export const changeOrderStatus = (id: string, status: IOrder["status"]) => {
   assertValidId(id);
   return orderService.adminUpdateStatus(id, status);
 };
+
+export const listContactSubmissions = () =>
+  contactService.listSubmissions();

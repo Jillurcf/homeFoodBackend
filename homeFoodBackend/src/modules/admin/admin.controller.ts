@@ -110,3 +110,6 @@ export const updateOrderStatus = (req: Request, res: Response) =>
       status as IOrder["status"]
     );
   });
+
+export const listContactSubmissions = (_req: Request, res: Response) =>
+  respond(res, adminService.listContactSubmissions);

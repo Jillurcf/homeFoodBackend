@@ -21,6 +21,7 @@ vi.mock("../admin.service", () => ({
   removeFood: vi.fn(),
   listOrders: vi.fn(),
   changeOrderStatus: vi.fn(),
+  listContactSubmissions: vi.fn(),
 }));
 
 const app = express();
@@ -57,6 +58,7 @@ describe("admin API routes", () => {
     vi.mocked(adminService.removeFood).mockResolvedValue({ _id: id } as never);
     vi.mocked(adminService.listOrders).mockResolvedValue([]);
     vi.mocked(adminService.changeOrderStatus).mockResolvedValue({ _id: id, status: "DELIVERED" } as never);
+    vi.mocked(adminService.listContactSubmissions).mockResolvedValue([]);
   });
 
   it("rejects guests and non-admin users before invoking admin handlers", async () => {
@@ -202,5 +204,20 @@ describe("admin API routes", () => {
       id,
       "DELIVERED"
     );
+  });
+
+  it("keeps contact messages available to admins only", async () => {
+    const guest = await request(app).get("/api/admin/contact-submissions");
+    const buyer = await request(app)
+      .get("/api/admin/contact-submissions")
+      .set("Authorization", `Bearer ${tokenFor("buyer-1", "buyer")}`);
+    const admin = await request(app)
+      .get("/api/admin/contact-submissions")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(guest.status).toBe(401);
+    expect(buyer.status).toBe(403);
+    expect(admin.status).toBe(200);
+    expect(adminService.listContactSubmissions).toHaveBeenCalledOnce();
   });
 });

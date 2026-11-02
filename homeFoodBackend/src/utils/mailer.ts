@@ -68,3 +68,63 @@ export async function sendPasswordResetOtp(
     html,
   });
 }
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[character];
+  });
+
+export async function sendContactSubmissionNotification(submission: {
+  name: string;
+  email: string;
+  mobile: string;
+  topic: string;
+  message: string;
+  senderRole: string;
+}) {
+  const client = getTransporter();
+  if (!client) throw new Error("Email service is not configured");
+
+  const escaped = {
+    name: escapeHtml(submission.name),
+    email: escapeHtml(submission.email),
+    mobile: escapeHtml(submission.mobile || "Not provided"),
+    topic: escapeHtml(submission.topic),
+    message: escapeHtml(submission.message),
+    senderRole: escapeHtml(submission.senderRole),
+  };
+  const text = [
+    `New contact message (${submission.topic})`,
+    `From: ${submission.name} <${submission.email}>`,
+    `Mobile: ${submission.mobile || "Not provided"}`,
+    `Account type: ${submission.senderRole}`,
+    "",
+    submission.message,
+  ].join("\n");
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <h2>New contact message: ${escaped.topic}</h2>
+      <p><strong>From:</strong> ${escaped.name} &lt;${escaped.email}&gt;</p>
+      <p><strong>Mobile:</strong> ${escaped.mobile}</p>
+      <p><strong>Account type:</strong> ${escaped.senderRole}</p>
+      <hr />
+      <p style="white-space: pre-wrap;">${escaped.message}</p>
+    </div>
+  `;
+
+  await client.sendMail({
+    from: env.SMTP_FROM,
+    to: env.SUPPORT_EMAIL,
+    replyTo: { name: submission.name, address: submission.email },
+    subject: `New HomeFood contact message: ${submission.topic}`,
+    text,
+    html,
+  });
+}
