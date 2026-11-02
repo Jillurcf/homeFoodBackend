@@ -74,7 +74,7 @@ app.get("/health", (_req, res) => {
         timestamp: new Date().toISOString(),
     });
 });
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: "4mb" }));
 // Static food images (served for imageUrl values like /images/HilishaFish.jpg)
 app.use("/images", express_1.default.static(path_1.default.join(__dirname, "..", "assets", "images", "HomeFoodImg")));
 // Routes

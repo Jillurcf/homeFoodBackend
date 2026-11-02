@@ -22,3 +22,11 @@ export const findUserById = async (id: string) => {
 
   return await query;
 };
+
+export const findUserByIdWithPassword = async (id: string) => {
+  return await User.findById(id);
+};
+
+export const updateUserPassword = async (id: string, password: string) => {
+  return await User.findByIdAndUpdate(id, { password }, { new: true });
+};

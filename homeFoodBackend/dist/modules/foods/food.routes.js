@@ -42,7 +42,7 @@ router.get("/", foodController.listFoods);
 router.get("/categories", foodController.getCategories);
 router.get("/seller/mine", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("seller", "admin"), foodController.getMyFoods);
 router.get("/:id", foodController.getFoodById);
-router.post("/", auth_middleware_1.authenticate, foodController.createFood);
+router.post("/", auth_middleware_1.authenticate, (0, requireRole_1.requireRole)("seller", "admin"), foodController.createFood);
 router.patch("/:id", auth_middleware_1.authenticate, foodController.updateFood);
 router.delete("/:id", auth_middleware_1.authenticate, foodController.deleteFood);
 exports.default = router;

@@ -36,7 +36,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const validate_1 = require("../../middlewares/validate");
 const auth_validation_1 = require("./auth.validation");
+const passwordReset_validation_1 = require("./passwordReset.validation");
 const authController = __importStar(require("./auth.controller"));
+const passwordResetController = __importStar(require("./passwordReset.controller"));
 const auth_middleware_1 = require("./auth.middleware");
 const router = (0, express_1.Router)();
 router.post("/register", (0, validate_1.validate)(auth_validation_1.registerSchema), authController.register);
@@ -44,5 +46,12 @@ router.post("/login", (0, validate_1.validate)(auth_validation_1.loginSchema), a
 router.get("/me", auth_middleware_1.authenticate, authController.getMe);
 router.post("/refresh", auth_middleware_1.authenticate, authController.refreshSession);
 router.post("/check-username", (0, validate_1.validate)(auth_validation_1.checkUsernameSchema), authController.checkUsername);
+// Password reset (OTP) flow
+router.post("/forgot-password", (0, validate_1.validate)(passwordReset_validation_1.forgotPasswordSchema), passwordResetController.forgotPassword);
+router.post("/resend-otp", (0, validate_1.validate)(passwordReset_validation_1.resendOtpSchema), passwordResetController.resendOtp);
+router.post("/verify-otp", (0, validate_1.validate)(passwordReset_validation_1.verifyOtpSchema), passwordResetController.verifyOtp);
+router.post("/reset-password", (0, validate_1.validate)(passwordReset_validation_1.resetPasswordSchema), passwordResetController.resetPassword);
+// Authenticated password change (web + mobile)
+router.post("/change-password", auth_middleware_1.authenticate, (0, validate_1.validate)(passwordReset_validation_1.changePasswordSchema), passwordResetController.changePassword);
 exports.default = router;
 //# sourceMappingURL=auth.routes.js.map

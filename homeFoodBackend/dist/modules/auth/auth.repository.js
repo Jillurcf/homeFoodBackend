@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserById = exports.findUserByUsername = exports.findUserByEmail = exports.createUser = void 0;
+exports.updateUserPassword = exports.findUserByIdWithPassword = exports.findUserById = exports.findUserByUsername = exports.findUserByEmail = exports.createUser = void 0;
 const user_model_1 = __importDefault(require("../../model/user/user.model"));
 const createUser = async (data) => {
     return await user_model_1.default.create(data);
@@ -25,4 +25,12 @@ const findUserById = async (id) => {
     return await query;
 };
 exports.findUserById = findUserById;
+const findUserByIdWithPassword = async (id) => {
+    return await user_model_1.default.findById(id);
+};
+exports.findUserByIdWithPassword = findUserByIdWithPassword;
+const updateUserPassword = async (id, password) => {
+    return await user_model_1.default.findByIdAndUpdate(id, { password }, { new: true });
+};
+exports.updateUserPassword = updateUserPassword;
 //# sourceMappingURL=auth.repository.js.map
