@@ -26,6 +26,12 @@ export const getCategories = async () => {
   return await foodRepository.getCategoryCounts();
 };
 
+const isFoodOwner = (food: { sellerId: any }, userId: string, role: string) => {
+  if (role === "admin") return true;
+  const sellerId = food.sellerId?._id ?? food.sellerId;
+  return sellerId?.toString() === userId;
+};
+
 export const createFood = async (sellerId: string, payload: CreateFoodInput) => {
   const shop = await FoodMaker.findOne({ userId: sellerId });
   if (!shop) {
@@ -53,7 +59,7 @@ export const updateFood = async (
 ) => {
   const food = await foodRepository.findFoodById(id);
   if (!food) throw { status: 404, message: "Food not found" };
-  if (food.sellerId.toString() !== userId && role !== "admin") {
+  if (!isFoodOwner(food, userId, role)) {
     throw { status: 403, message: "Not authorized to modify this food" };
   }
 
@@ -67,7 +73,7 @@ export const updateFood = async (
 export const deleteFood = async (id: string, userId: string, role: string) => {
   const food = await foodRepository.findFoodById(id);
   if (!food) throw { status: 404, message: "Food not found" };
-  if (food.sellerId.toString() !== userId && role !== "admin") {
+  if (!isFoodOwner(food, userId, role)) {
     throw { status: 403, message: "Not authorized to modify this food" };
   }
 
