@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as contactRepository from "../contact.repository";
 import * as mailer from "../../../utils/mailer";
 import * as contactService from "../contact.service";
+import type { ContactSubmissionInput } from "../contact.validation";
 
 vi.mock("../contact.repository", () => ({
   createSubmission: vi.fn(),
@@ -12,7 +13,7 @@ vi.mock("../../../utils/mailer", () => ({
   sendContactSubmissionNotification: vi.fn(),
 }));
 
-const input = {
+const input: ContactSubmissionInput = {
   name: "Buyer Name",
   email: "buyer@example.com",
   mobile: "0123456789",
