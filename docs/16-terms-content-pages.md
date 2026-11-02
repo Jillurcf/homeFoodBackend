@@ -9,7 +9,7 @@
 | Language | Bangla only |
 | Version | `1.0` |
 | Effective date | `৩০ অক্টোবর ২০২৬` |
-| Contact details | Existing contact page values (`care@homefood.app`, `+880 1700-000000`, Dhanmondi address) |
+| Contact details | Existing contact page values (`gharerkhabar.net@gmail.com`, `+880 1700-000000`, Dhanmondi address) |
 | Website | `https://gharerkhabar.net` |
 | Source of truth | Local content modules in each app; no CMS/API |
 

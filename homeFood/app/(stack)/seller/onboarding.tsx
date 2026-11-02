@@ -19,7 +19,8 @@ import {
 import { Chip, Input, PillButton } from "@/src/components/ui";
 import { colors } from "@/src/constants/theme";
 import tw from "@/src/lib/tailwind";
-import { useAppSelector } from "@/src/store/hooks";
+import { refreshSessionThunk } from "@/src/store/authSlice";
+import { useAppDispatch, useAppSelector } from "@/src/store/hooks";
 import { useShop } from "@/src/store/shopStore";
 
 const STEP_TITLES = [
@@ -76,6 +77,7 @@ function kitchenTypeLabel(value: KitchenType) {
 
 export default function SellerOnboardingScreen() {
   const insets = useSafeAreaInsets();
+  const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
   const { setIsShopAdded } = useShop();
 
@@ -201,6 +203,7 @@ export default function SellerOnboardingScreen() {
         termsVersion: TERMS_VERSION,
       }).unwrap();
 
+      await dispatch(refreshSessionThunk()).unwrap();
       setIsShopAdded(true);
       router.replace("/(stack)/seller/dashboard");
     } catch (err: unknown) {

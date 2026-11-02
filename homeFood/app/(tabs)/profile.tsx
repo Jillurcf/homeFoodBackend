@@ -105,6 +105,19 @@ export default function ProfileScreen() {
       <Text
         style={tw`mt-6 text-xs font-semibold uppercase tracking-wide text-textMuted`}
       >
+        Account
+      </Text>
+      <View style={tw`mt-2`}>
+        <MenuRow
+          icon="lock-closed-outline"
+          label="Change password"
+          onPress={() => router.push("/(stack)/change-password" as never)}
+        />
+      </View>
+
+      <Text
+        style={tw`mt-6 text-xs font-semibold uppercase tracking-wide text-textMuted`}
+      >
         Support & info
       </Text>
       <View style={tw`mt-2 gap-2.5`}>

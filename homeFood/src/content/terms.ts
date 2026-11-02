@@ -22,7 +22,7 @@ export interface TermsDocument {
 }
 
 export const CONTACT_DETAILS = {
-  email: "care@homefood.app",
+  email: "gharerkhabar.net@gmail.com",
   phone: "+880 1700-000000",
   address: "House 12, Road 5, Dhanmondi, Dhaka 1205",
   website: "https://gharerkhabar.net",

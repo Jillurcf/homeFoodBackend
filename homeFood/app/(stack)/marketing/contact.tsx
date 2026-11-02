@@ -4,7 +4,8 @@ import { Text, View } from "react-native";
 import { MarketingShell } from "@/src/components/marketing/MarketingShell";
 import { Chip, Input, PillButton } from "@/src/components/ui";
 import { colors } from "@/src/constants/theme";
-import { saveContactSubmission } from "@/src/lib/contactSubmissions";
+import { api } from "@/src/api/clients";
+import { useAppSelector } from "@/src/store/hooks";
 import tw from "@/src/lib/tailwind";
 
 const TOPICS = [
@@ -20,7 +21,7 @@ const CONTACT_INFO = [
   {
     icon: "mail-outline" as const,
     label: "Email",
-    value: "care@homefood.app",
+    value: "gharerkhabar.net@gmail.com",
     note: "For detailed questions and documents",
   },
   {
@@ -44,6 +45,7 @@ const CONTACT_INFO = [
 ];
 
 export default function ContactScreen() {
+  const token = useAppSelector((state) => state.auth.token);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
@@ -51,7 +53,11 @@ export default function ContactScreen() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [sent, setSent] = useState<{ name: string; topic: string } | null>(null);
+  const [sent, setSent] = useState<{
+    name: string;
+    topic: string;
+    emailSent: boolean;
+  } | null>(null);
 
   const reset = () => {
     setName("");
@@ -84,14 +90,24 @@ export default function ContactScreen() {
     setError(null);
     setSubmitting(true);
     try {
-      await saveContactSubmission({
-        name: name.trim(),
-        email: email.trim(),
-        mobile: mobile.trim(),
-        topic,
-        message: message.trim(),
-      });
-      setSent({ name: name.trim(), topic });
+      const response = await api.post<{
+        success: boolean;
+        data: { emailSent: boolean };
+      }>(
+        "/contact",
+        {
+          name: name.trim(),
+          email: email.trim(),
+          mobile: mobile.trim(),
+          topic,
+          message: message.trim(),
+        },
+        token ?? undefined,
+      );
+      if (!response.success) {
+        throw new Error("The server could not save your message.");
+      }
+      setSent({ name: name.trim(), topic, emailSent: response.data.emailSent });
     } catch {
       setError("We couldn't send your message. Please try again.");
     } finally {
@@ -124,6 +140,11 @@ export default function ContactScreen() {
             Thank you, {firstName}. Our support team has received your message
             about “{sent.topic}” and will reply within one working day.
           </Text>
+          {!sent.emailSent && (
+            <Text style={tw`mt-3 text-center text-xs leading-5 text-amber-700`}>
+              Your message is saved for our team, but the email notification is delayed.
+            </Text>
+          )}
           <PillButton
             title="Send another message"
             style={tw`mt-6`}

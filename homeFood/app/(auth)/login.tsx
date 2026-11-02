@@ -73,7 +73,6 @@ const Login = () => {
         </View>
       ) : null}
 
-<TextInput  />
       <View style={tw`gap-3`}>
         <View>
           <Text style={tw`mb-1.5 text-sm font-medium text-text`}>Email</Text>
@@ -124,13 +123,21 @@ const Login = () => {
         </View>
       </View>
 
+      <TouchableOpacity
+        onPress={() => router.push("/(auth)/forgot-password" as never)}
+        accessibilityRole="button"
+        style={tw`mt-3 self-end`}
+      >
+        <Text style={tw`text-sm font-semibold text-primary`}>Forgot password?</Text>
+      </TouchableOpacity>
+
       <PillButton
         title="Login"
         onPress={handleLogin}
         loading={isLoading}
         disabled={!allFilled}
         fullWidth
-        style={tw`mt-5`}
+        style={tw`mt-4`}
       />
     </AuthShell>
   );

@@ -94,6 +94,27 @@ export const fetchMeThunk = createAsyncThunk(
   }
 );
 
+export const refreshSessionThunk = createAsyncThunk(
+  "auth/refreshSession",
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: AuthState };
+      const token =
+        state.auth.token ?? (await SecureStore.getItemAsync(TOKEN_KEY));
+      if (!token) throw new Error("No token");
+
+      const json = await api.post<{
+        success: boolean;
+        data: { user: User; token: string };
+      }>("/auth/refresh", {}, token);
+      await SecureStore.setItemAsync(TOKEN_KEY, json.data.token);
+      return json.data;
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Session refresh failed");
+    }
+  }
+);
+
 export const logoutThunk = createAsyncThunk(
   "auth/logout",
   async () => {
@@ -163,6 +184,12 @@ const authSlice = createSlice({
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+      })
+      .addCase(refreshSessionThunk.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.hasChecked = true;
       })
       // Logout
       .addCase(logoutThunk.fulfilled, (state) => {

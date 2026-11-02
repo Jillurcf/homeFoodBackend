@@ -18,7 +18,7 @@ Static screens under `app/(stack)/marketing/`:
 - `about.tsx` — mission cards, dark ink "Our Founder" block, vision goals with check icons
 - `help.tsx` — 4 topic cards, pill filters, accordion FAQ (reuse website's 12 FAQ strings)
 - `trust.tsx` — 4 trust pillars, verification steps, ink buyer-protection block, gradient "Spot a problem?" CTA → contact
-- `contact.tsx` — 4 contact info cards + form (name, email, mobile, topic select, message) with success state (store submissions locally for now)
+- `contact.tsx` — 4 contact info cards + form (name, email, mobile, topic select, message); submissions are saved in the backend admin inbox and emailed to the support address
 
 Linked from Profile menu (M09) and seller dashboard.
 

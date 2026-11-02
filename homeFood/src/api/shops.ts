@@ -23,7 +23,10 @@ export interface ShopProfile {
   verified: boolean;
 }
 
-export type ShopPayload = Omit<ShopProfile, "id" | "verified">;
+export type ShopPayload = Omit<ShopProfile, "id" | "verified"> & {
+  acceptedTerms?: boolean;
+  termsVersion?: string;
+};
 
 export interface PopularFood {
   foodId: string;
