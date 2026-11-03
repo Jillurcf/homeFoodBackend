@@ -1,4 +1,5 @@
 import FoodMaker, { IFoodMaker } from "./foodMaker.model";
+import User from "../../model/user/user.model";
 
 export const findByUserId = async (userId: string) => {
   return await FoodMaker.findOne({ userId });
@@ -9,7 +10,21 @@ export const findById = async (id: string) => {
 };
 
 export const findAll = async () => {
-  return await FoodMaker.find().sort({ createdAt: -1 });
+  const sellers = await User.find({ role: "seller" }).select("_id").lean();
+  const sellerIds = sellers.map((seller) => seller._id.toString());
+  if (sellerIds.length === 0) return [];
+
+  const shops = await FoodMaker.find({ userId: { $in: sellerIds } }).sort({
+    createdAt: -1,
+  });
+  const seenUserIds = new Set<string>();
+
+  return shops.filter((shop) => {
+    const userId = shop.userId.toString();
+    if (seenUserIds.has(userId)) return false;
+    seenUserIds.add(userId);
+    return true;
+  });
 };
 
 export const createShop = async (userId: string, data: Partial<IFoodMaker> & { acceptedTerms?: boolean; termsVersion?: string }) => {

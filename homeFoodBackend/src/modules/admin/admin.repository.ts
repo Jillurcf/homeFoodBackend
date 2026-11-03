@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Food from "../foods/food.model";
 import FoodMaker from "../foodMakers/foodMaker.model";
+import * as foodMakerRepository from "../foodMakers/foodMaker.repository";
 import Order, { IOrder } from "../orders/order.model";
 import User from "../../model/user/user.model";
 
@@ -10,13 +11,13 @@ export const getStats = async () => {
 
   const [users, shops, foods, orders, ordersToday] = await Promise.all([
     User.countDocuments(),
-    FoodMaker.countDocuments(),
+    foodMakerRepository.findAll(),
     Food.countDocuments(),
     Order.countDocuments(),
     Order.countDocuments({ createdAt: { $gte: startOfToday } }),
   ]);
 
-  return { users, shops, foods, orders, ordersToday };
+  return { users, shops: shops.length, foods, orders, ordersToday };
 };
 
 export const findUsers = async (role?: string) => {
@@ -64,9 +65,17 @@ export const updateUser = async (
 };
 
 export const deleteUser = async (id: string) => {
-  return User.findByIdAndDelete(id)
+  const user = await User.findByIdAndDelete(id)
     .select("-password -nidNumber")
     .lean();
+  if (!user) return null;
+
+  await Promise.all([
+    FoodMaker.deleteMany({ userId: id }),
+    Food.deleteMany({ sellerId: new mongoose.Types.ObjectId(id) }),
+  ]);
+
+  return user;
 };
 
 export const updateUserRole = async (
@@ -79,10 +88,11 @@ export const updateUserRole = async (
 };
 
 export const findShops = async () => {
-  return FoodMaker.find()
-    .select("-nidNumber")
-    .sort({ createdAt: -1 })
-    .lean();
+  const shops = await foodMakerRepository.findAll();
+  return shops.map((shop) => {
+    const { nidNumber: _nidNumber, ...publicShop } = shop.toObject();
+    return publicShop;
+  });
 };
 
 export const setShopVerification = async (id: string, verified: boolean) => {
