@@ -32,12 +32,6 @@ export async function sendPasswordResetOtp(
   const client = getTransporter();
 
   if (!client) {
-    if (env.NODE_ENV !== "production") {
-      console.warn(
-        `[mailer] SMTP is not configured. Password reset OTP for ${email}: ${otp}`
-      );
-      return;
-    }
     throw new Error("Email service is not configured");
   }
 

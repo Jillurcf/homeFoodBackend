@@ -55,8 +55,15 @@ export const requestPasswordReset = async (email: string) => {
     try {
       await sendPasswordResetOtp(normalized, otp, env.OTP_TTL_MINUTES);
     } catch (error) {
-      // Do not reveal delivery failures to the caller.
+      await passwordResetRepository.deleteResetByEmailAndCodeHash(
+        normalized,
+        codeHash
+      );
       console.error("Failed to send password reset email:", error);
+      throw {
+        status: 503,
+        message: "Unable to send a password reset email. Please try again later.",
+      };
     }
   }
 

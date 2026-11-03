@@ -56,3 +56,13 @@ export const consumeReset = async (email: string) => {
 export const deleteResetByEmail = async (email: string) => {
   return PasswordResetOtp.deleteOne({ email: email.toLowerCase().trim() });
 };
+
+export const deleteResetByEmailAndCodeHash = async (
+  email: string,
+  codeHash: string
+) => {
+  return PasswordResetOtp.deleteOne({
+    email: email.toLowerCase().trim(),
+    codeHash,
+  });
+};
