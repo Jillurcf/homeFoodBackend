@@ -60,16 +60,52 @@ export const getPublicShop = async (req: Request, res: Response) => {
   try {
     const shop = await foodMakerService.getPublicShop(req.params.shopId);
 
+    if (shop) {
+      return res.json({
+        success: true,
+        data: foodMakerService.toPublicShop(shop),
+      });
+    }
+
+    const shopByUser = await foodMakerService.getPublicShopByUser(
+      req.params.shopId
+    );
+
+    if (!shopByUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Shop not found" });
+    }
+
+    return res.json({ success: true, data: shopByUser });
+  } catch (err: any) {
+    return handleError(res, err);
+  }
+};
+
+export const listPublicShops = async (_req: Request, res: Response) => {
+  try {
+    const shops = await foodMakerService.listPublicShops();
+
+    return res.json({ success: true, data: shops });
+  } catch (err: any) {
+    return handleError(res, err);
+  }
+};
+
+export const getPublicShopByUser = async (req: Request, res: Response) => {
+  try {
+    const shop = await foodMakerService.getPublicShopByUser(
+      req.params.userId
+    );
+
     if (!shop) {
       return res
         .status(404)
         .json({ success: false, message: "Shop not found" });
     }
 
-    return res.json({
-      success: true,
-      data: foodMakerService.toPublicShop(shop),
-    });
+    return res.json({ success: true, data: shop });
   } catch (err: any) {
     return handleError(res, err);
   }

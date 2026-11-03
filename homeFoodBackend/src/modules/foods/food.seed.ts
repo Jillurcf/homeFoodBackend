@@ -267,7 +267,7 @@ const REVIEWS = [
     author: "Arif Chowdhury",
     area: "Gulshan",
     rating: 5,
-    text: "Clean, tasty and quick. Flavourful without being greasy — exactly what I wanted from a home chef.",
+    text: "Clean, tasty and quick. Flavourful without being greasy — exactly what I wanted from a Kitchen Queen.",
   },
   {
     author: "Nusrat Jahan",

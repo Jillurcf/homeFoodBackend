@@ -10,6 +10,13 @@ router.get("/me/stats", authenticate, requireRole("buyer", "seller"), foodMakerC
 
 router.post("/me", authenticate, requireRole("buyer", "seller"), foodMakerController.upsertMe);
 
+router.get("/", foodMakerController.listPublicShops);
+
+router.get(
+  "/user/:userId",
+  foodMakerController.getPublicShopByUser
+);
+
 router.get("/:shopId", foodMakerController.getPublicShop);
 
 export default router;

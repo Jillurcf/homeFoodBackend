@@ -6,6 +6,7 @@ export const listFoodsQuerySchema = z.object({
   category: z.string().optional(),
   search: z.string().optional(),
   area: z.string().optional(),
+  sellerId: z.string().optional(),
   minPrice: z.coerce.number().min(0).optional(),
   maxPrice: z.coerce.number().min(0).optional(),
   minRating: z.coerce.number().min(0).max(5).optional(),

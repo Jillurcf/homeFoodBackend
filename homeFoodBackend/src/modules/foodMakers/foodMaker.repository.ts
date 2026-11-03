@@ -8,6 +8,10 @@ export const findById = async (id: string) => {
   return await FoodMaker.findById(id);
 };
 
+export const findAll = async () => {
+  return await FoodMaker.find().sort({ createdAt: -1 });
+};
+
 export const createShop = async (userId: string, data: Partial<IFoodMaker> & { acceptedTerms?: boolean; termsVersion?: string }) => {
   const { acceptedTerms, termsVersion, ...shopData } = data as Record<string, unknown>;
   return await FoodMaker.create({ ...shopData, userId });

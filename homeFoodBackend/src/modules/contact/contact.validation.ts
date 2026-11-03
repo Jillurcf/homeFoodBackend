@@ -14,7 +14,7 @@ export const contactSubmissionSchema = z.object({
   topic: z.enum([
     "Order issue",
     "Delivery & payment",
-    "Becoming a home chef",
+    "Becoming a Kitchen Queen",
     "Account & verification",
     "Feedback & suggestions",
     "Something else",

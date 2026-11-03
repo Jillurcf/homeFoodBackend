@@ -41,12 +41,51 @@ export const saveMyShop = async (userId: string, input: ShopInput) => {
 };
 
 export const getPublicShop = async (shopId: string) => {
-  return await foodMakerRepository.findById(shopId);
+  try {
+    const shop = await foodMakerRepository.findById(shopId);
+    if (shop) return shop;
+  } catch (err: any) {
+    if (err?.name !== "CastError") throw err;
+  }
+
+  return await foodMakerRepository.findByUserId(shopId);
 };
 
 export const toPublicShop = (shop: IFoodMaker) => {
   const { nidNumber, ...publicShop } = shop.toObject();
-  return publicShop;
+  return { ...publicShop, id: shop._id.toString() };
+};
+
+export const listPublicShops = async () => {
+  const shops = await foodMakerRepository.findAll();
+  return shops.map(toPublicShop);
+};
+
+export const getPublicShopByUser = async (userId: string) => {
+  const shop = await foodMakerRepository.findByUserId(userId);
+  if (shop) {
+    return toPublicShop(shop);
+  }
+
+  const user = await User.findById(userId);
+  if (!user) return null;
+
+  const area = user.address || "";
+
+  return {
+    id: user._id.toString(),
+    userId: user._id.toString(),
+    fullName: user.name,
+    shopName: user.name,
+    photoUrl: user.avatarUrl || "",
+    kitchenType: "home",
+    area,
+    address: area,
+    areas: area ? [area] : [],
+    openHours: "",
+    bio: "",
+    verified: Boolean(user.isVerified),
+  };
 };
 
 export const getMyStats = async (sellerId: string) => {

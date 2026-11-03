@@ -8,6 +8,7 @@ const buildQuery = (filters: ListFoodsQuery) => {
 
   if (filters.category) query.category = filters.category;
   if (filters.area) query.area = filters.area;
+  if (filters.sellerId) query.sellerId = filters.sellerId;
 
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     query.price = {};
