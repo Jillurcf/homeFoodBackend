@@ -142,5 +142,12 @@ export const changeOrderStatus = (id: string, status: IOrder["status"]) => {
   return orderService.adminUpdateStatus(id, status);
 };
 
+export const removeOrder = async (id: string) => {
+  assertValidId(id);
+  const order = await adminRepository.deleteOrder(id);
+  if (!order) throw Object.assign(new Error("Order not found"), { status: 404 });
+  return order;
+};
+
 export const listContactSubmissions = () =>
   contactService.listSubmissions();

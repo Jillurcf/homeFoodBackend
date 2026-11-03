@@ -8,11 +8,12 @@ import User from "../../model/user/user.model";
 export const getStats = async () => {
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
+  const shops = await foodMakerRepository.findAll();
+  const sellerIds = [...new Set(shops.map((shop) => shop.userId.toString()))];
 
-  const [users, shops, foods, orders, ordersToday] = await Promise.all([
+  const [users, foods, orders, ordersToday] = await Promise.all([
     User.countDocuments(),
-    foodMakerRepository.findAll(),
-    Food.countDocuments(),
+    Food.countDocuments({ sellerId: { $in: sellerIds } }),
     Order.countDocuments(),
     Order.countDocuments({ createdAt: { $gte: startOfToday } }),
   ]);
@@ -113,12 +114,17 @@ export const setUserVerification = async (userId: string, verified: boolean) => 
 };
 
 export const findFoods = async (sellerId?: string) => {
-  const query: { sellerId?: mongoose.Types.ObjectId } = {};
+  const activeSellerIds = await foodMakerRepository.findSellerIdsWithShops();
+  const query: { sellerId: { $in: mongoose.Types.ObjectId[] } } = {
+    sellerId: { $in: activeSellerIds.map((id) => new mongoose.Types.ObjectId(id)) },
+  };
   if (sellerId) {
     if (!mongoose.isValidObjectId(sellerId)) {
       throw Object.assign(new Error("Invalid seller ID"), { status: 400 });
     }
-    query.sellerId = new mongoose.Types.ObjectId(sellerId);
+    query.sellerId.$in = query.sellerId.$in.filter(
+      (id) => id.toString() === sellerId
+    );
   }
   return Food.find(query).sort({ createdAt: -1 }).lean();
 };
@@ -138,4 +144,8 @@ export const deleteFood = async (id: string) => {
 export const findOrders = async (status?: IOrder["status"]) => {
   const query = status ? { status } : {};
   return Order.find(query).sort({ createdAt: -1 }).lean();
+};
+
+export const deleteOrder = async (id: string) => {
+  return Order.findByIdAndDelete(id).lean();
 };

@@ -20,6 +20,7 @@ router.patch("/foods/:id", adminController.updateFood);
 router.delete("/foods/:id", adminController.deleteFood);
 router.get("/orders", adminController.listOrders);
 router.patch("/orders/:id/status", adminController.updateOrderStatus);
+router.delete("/orders/:id", adminController.deleteOrder);
 router.get("/contact-submissions", adminController.listContactSubmissions);
 
 export default router;

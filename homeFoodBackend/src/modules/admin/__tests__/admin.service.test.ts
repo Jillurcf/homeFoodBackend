@@ -5,6 +5,7 @@ import * as adminService from "../admin.service";
 vi.mock("../admin.repository", () => ({
   setShopVerification: vi.fn(),
   setUserVerification: vi.fn(),
+  deleteOrder: vi.fn(),
 }));
 
 vi.mock("../../orders/order.service", () => ({
@@ -57,5 +58,31 @@ describe("admin service shop verification", () => {
       status: 404,
     });
     expect(adminRepository.setUserVerification).not.toHaveBeenCalled();
+  });
+
+  it("deletes an order after validating its ID", async () => {
+    vi.mocked(adminRepository.deleteOrder).mockResolvedValue({
+      _id: shopId,
+    } as never);
+
+    await expect(adminService.removeOrder(shopId)).resolves.toMatchObject({
+      _id: shopId,
+    });
+    expect(adminRepository.deleteOrder).toHaveBeenCalledWith(shopId);
+  });
+
+  it("rejects invalid order IDs without querying the repository", async () => {
+    await expect(adminService.removeOrder("not-an-id")).rejects.toMatchObject({
+      status: 400,
+    });
+    expect(adminRepository.deleteOrder).not.toHaveBeenCalled();
+  });
+
+  it("returns 404 when the order to delete does not exist", async () => {
+    vi.mocked(adminRepository.deleteOrder).mockResolvedValue(null);
+
+    await expect(adminService.removeOrder(shopId)).rejects.toMatchObject({
+      status: 404,
+    });
   });
 });

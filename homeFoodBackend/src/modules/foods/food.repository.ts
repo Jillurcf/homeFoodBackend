@@ -1,5 +1,6 @@
 import Food, { IFood } from "./food.model";
 import { ListFoodsQuery } from "./food.validation";
+import { findSellerIdsWithShops } from "../foodMakers/foodMaker.repository";
 
 const SELLER_FIELDS = "name avatarUrl isVerified";
 
@@ -46,6 +47,12 @@ export const listFoods = async (filters: ListFoodsQuery) => {
   const query = buildQuery(filters);
   const sort = buildSort(filters.sort);
   const skip = (filters.page - 1) * filters.limit;
+  const activeSellerIds = await findSellerIdsWithShops();
+  const sellerIds = filters.sellerId
+    ? activeSellerIds.filter((sellerId) => sellerId === filters.sellerId)
+    : activeSellerIds;
+  if (sellerIds.length === 0) return { foods: [], total: 0 };
+  query.sellerId = { $in: sellerIds };
 
   const [foods, total] = await Promise.all([
     Food.find(query)
@@ -61,7 +68,12 @@ export const listFoods = async (filters: ListFoodsQuery) => {
 };
 
 export const findFoodById = async (id: string) => {
-  return await Food.findById(id).populate("sellerId", SELLER_FIELDS);
+  const sellerIds = await findSellerIdsWithShops();
+  if (sellerIds.length === 0) return null;
+  return await Food.findOne({
+    _id: id,
+    sellerId: { $in: sellerIds },
+  }).populate("sellerId", SELLER_FIELDS);
 };
 
 export const findFoodsByIds = async (ids: string[]) => {
@@ -74,6 +86,8 @@ export const findFoodsByIds = async (ids: string[]) => {
 };
 
 export const findFoodsBySeller = async (sellerId: string) => {
+  const activeSellerIds = await findSellerIdsWithShops();
+  if (!activeSellerIds.includes(sellerId)) return [];
   return await Food.find({ sellerId }).sort({ createdAt: -1 });
 };
 
@@ -90,7 +104,10 @@ export const deleteFood = async (id: string) => {
 };
 
 export const getCategoryCounts = async () => {
+  const sellerIds = await findSellerIdsWithShops();
+  if (sellerIds.length === 0) return [];
   return await Food.aggregate([
+    { $match: { sellerId: { $in: sellerIds } } },
     { $group: { _id: "$category", count: { $sum: 1 } } },
     { $sort: { count: -1 } },
     { $project: { _id: 0, category: "$_id", count: 1 } },

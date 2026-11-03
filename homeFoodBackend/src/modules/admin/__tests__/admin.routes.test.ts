@@ -21,6 +21,7 @@ vi.mock("../admin.service", () => ({
   removeFood: vi.fn(),
   listOrders: vi.fn(),
   changeOrderStatus: vi.fn(),
+  removeOrder: vi.fn(),
   listContactSubmissions: vi.fn(),
 }));
 
@@ -58,6 +59,7 @@ describe("admin API routes", () => {
     vi.mocked(adminService.removeFood).mockResolvedValue({ _id: id } as never);
     vi.mocked(adminService.listOrders).mockResolvedValue([]);
     vi.mocked(adminService.changeOrderStatus).mockResolvedValue({ _id: id, status: "DELIVERED" } as never);
+    vi.mocked(adminService.removeOrder).mockResolvedValue({ _id: id } as never);
     vi.mocked(adminService.listContactSubmissions).mockResolvedValue([]);
   });
 
@@ -204,6 +206,15 @@ describe("admin API routes", () => {
       id,
       "DELIVERED"
     );
+  });
+
+  it("allows admins to delete orders", async () => {
+    const response = await request(app)
+      .delete(`/api/admin/orders/${id}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(response.status).toBe(200);
+    expect(adminService.removeOrder).toHaveBeenCalledWith(id);
   });
 
   it("keeps contact messages available to admins only", async () => {

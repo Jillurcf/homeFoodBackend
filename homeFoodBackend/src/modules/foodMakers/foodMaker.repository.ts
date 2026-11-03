@@ -9,9 +9,13 @@ export const findById = async (id: string) => {
   return await FoodMaker.findById(id);
 };
 
-export const findAll = async () => {
+export const findActiveSellerIds = async () => {
   const sellers = await User.find({ role: "seller" }).select("_id").lean();
-  const sellerIds = sellers.map((seller) => seller._id.toString());
+  return sellers.map((seller) => seller._id.toString());
+};
+
+export const findAll = async () => {
+  const sellerIds = await findActiveSellerIds();
   if (sellerIds.length === 0) return [];
 
   const shops = await FoodMaker.find({ userId: { $in: sellerIds } }).sort({
@@ -25,6 +29,11 @@ export const findAll = async () => {
     seenUserIds.add(userId);
     return true;
   });
+};
+
+export const findSellerIdsWithShops = async () => {
+  const shops = await findAll();
+  return [...new Set(shops.map((shop) => shop.userId.toString()))];
 };
 
 export const createShop = async (userId: string, data: Partial<IFoodMaker> & { acceptedTerms?: boolean; termsVersion?: string }) => {

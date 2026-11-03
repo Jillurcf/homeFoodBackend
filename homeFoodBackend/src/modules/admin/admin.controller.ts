@@ -111,5 +111,8 @@ export const updateOrderStatus = (req: Request, res: Response) =>
     );
   });
 
+export const deleteOrder = (req: Request, res: Response) =>
+  respond(res, () => adminService.removeOrder(req.params.id));
+
 export const listContactSubmissions = (_req: Request, res: Response) =>
   respond(res, adminService.listContactSubmissions);

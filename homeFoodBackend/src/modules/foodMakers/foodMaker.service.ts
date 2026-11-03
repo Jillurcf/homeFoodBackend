@@ -41,14 +41,13 @@ export const saveMyShop = async (userId: string, input: ShopInput) => {
 };
 
 export const getPublicShop = async (shopId: string) => {
-  try {
-    const shop = await foodMakerRepository.findById(shopId);
-    if (shop) return shop;
-  } catch (err: any) {
-    if (err?.name !== "CastError") throw err;
-  }
-
-  return await foodMakerRepository.findByUserId(shopId);
+  const shops = await foodMakerRepository.findAll();
+  return (
+    shops.find(
+      (shop) =>
+        shop._id.toString() === shopId || shop.userId.toString() === shopId
+    ) ?? null
+  );
 };
 
 export const toPublicShop = (shop: IFoodMaker) => {
@@ -62,30 +61,9 @@ export const listPublicShops = async () => {
 };
 
 export const getPublicShopByUser = async (userId: string) => {
-  const shop = await foodMakerRepository.findByUserId(userId);
-  if (shop) {
-    return toPublicShop(shop);
-  }
-
-  const user = await User.findById(userId);
-  if (!user) return null;
-
-  const area = user.address || "";
-
-  return {
-    id: user._id.toString(),
-    userId: user._id.toString(),
-    fullName: user.name,
-    shopName: user.name,
-    photoUrl: user.avatarUrl || "",
-    kitchenType: "home",
-    area,
-    address: area,
-    areas: area ? [area] : [],
-    openHours: "",
-    bio: "",
-    verified: Boolean(user.isVerified),
-  };
+  const shops = await foodMakerRepository.findAll();
+  const shop = shops.find((item) => item.userId.toString() === userId);
+  return shop ? toPublicShop(shop) : null;
 };
 
 export const getMyStats = async (sellerId: string) => {
