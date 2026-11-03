@@ -12,7 +12,7 @@ export function VerifiedBadge({ size = 14 }: VerifiedBadgeProps) {
       name="checkmark-circle"
       size={size}
       color={colors.success}
-      accessibilityLabel="Verified home chef"
+      accessibilityLabel="Verified Kitchen Queen"
     />
   );
 }

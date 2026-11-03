@@ -28,6 +28,20 @@ export type ShopPayload = Omit<ShopProfile, "id" | "verified"> & {
   termsVersion?: string;
 };
 
+export interface PublicShop {
+  id: string;
+  userId: string;
+  fullName: string;
+  shopName: string;
+  photoUrl?: string;
+  kitchenType?: KitchenType;
+  area?: string;
+  areas?: string[];
+  openHours?: string;
+  bio?: string;
+  verified: boolean;
+}
+
 export interface PopularFood {
   foodId: string;
   name: string;
@@ -85,6 +99,12 @@ export const shopsApi = createApi({
         response.data,
       providesTags: ["ShopStats"],
     }),
+    getPublicShopByUser: builder.query<PublicShop, string>({
+      query: (userId) => `/shops/user/${userId}`,
+      transformResponse: (response: { success: boolean; data: PublicShop }) =>
+        response.data,
+      providesTags: ["Shop"],
+    }),
     saveShop: builder.mutation<ShopProfile, ShopPayload>({
       query: (body) => ({ url: "/shops/me", method: "POST", body }),
       transformResponse: (response: ShopResponse) => mapShop(response.data),
@@ -93,5 +113,9 @@ export const shopsApi = createApi({
   }),
 });
 
-export const { useGetMyShopQuery, useGetMyStatsQuery, useSaveShopMutation } =
-  shopsApi;
+export const {
+  useGetMyShopQuery,
+  useGetMyStatsQuery,
+  useGetPublicShopByUserQuery,
+  useSaveShopMutation,
+} = shopsApi;

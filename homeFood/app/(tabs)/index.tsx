@@ -159,7 +159,7 @@ export default function HomeBrowseScreen() {
           Discover homemade food near you
         </Text>
         <Text style={tw`mt-2 text-sm text-textMuted`}>
-          Order from NID-verified women home chefs in your neighborhood, with real
+          Order from NID-verified Kitchen Queens in your neighborhood, with real
           ratings, reviews and honest availability.
         </Text>
 

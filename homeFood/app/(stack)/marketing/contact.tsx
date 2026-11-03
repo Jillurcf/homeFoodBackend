@@ -11,7 +11,7 @@ import tw from "@/src/lib/tailwind";
 const TOPICS = [
   "Order issue",
   "Delivery & payment",
-  "Becoming a home chef",
+  "Becoming a Kitchen Queen",
   "Account & verification",
   "Feedback & suggestions",
   "Something else",

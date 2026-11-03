@@ -79,6 +79,14 @@ export function FoodCard({ food, isFavorite, onToggleFavorite }: FoodCardProps) 
       params: { id: food.id },
     });
 
+  const openKitchen = () => {
+    if (!food.sellerId) return openDetail();
+    router.push({
+      pathname: "/(stack)/kitchen/[id]" as never,
+      params: { id: food.sellerId },
+    });
+  };
+
   return (
     <View
       style={tw`relative flex-1 overflow-hidden rounded-2xl border border-border bg-card shadow-sm`}
@@ -144,12 +152,18 @@ export function FoodCard({ food, isFavorite, onToggleFavorite }: FoodCardProps) 
           </Text>
         </TouchableOpacity>
 
-        <View style={tw`flex-row items-center gap-1`}>
+        <TouchableOpacity
+          onPress={openKitchen}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={`View ${food.seller}'s Kitchen Queen profile`}
+          style={tw`flex-row items-center gap-1`}
+        >
           <Text numberOfLines={1} style={tw`text-xs text-textMuted`}>
             {food.seller}
           </Text>
           {food.sellerVerified && <VerifiedBadge size={14} />}
-        </View>
+        </TouchableOpacity>
 
         <Stars rating={food.rating} count={food.reviewCount} size={12} />
 

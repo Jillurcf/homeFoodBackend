@@ -38,10 +38,13 @@ OTP_MAX_ATTEMPTS=5
 OTP_RESEND_COOLDOWN_SECONDS=60
 ```
 
-For Gmail, enable 2FA and create an App Password. In development, if SMTP is
-not configured the OTP is logged to the server console instead of emailed.
-Contact messages are saved for admins even when SMTP delivery is unavailable;
-configure SMTP to send notifications to `SUPPORT_EMAIL`.
+For Gmail, set `SMTP_USER` to the full Gmail address, enable 2FA, and create an
+App Password for `SMTP_PASS`. Configure the same sender address in `SMTP_FROM`.
+Password reset requests now return an error if SMTP is missing or delivery
+fails; failed sends do not leave a cooldown behind, so the user can retry.
+Set these variables in the backend deployment environment as well as local
+`.env.local`. Contact messages are saved for admins even when SMTP delivery is
+unavailable; configure SMTP to send notifications to `SUPPORT_EMAIL`.
 
 ## Web screens
 
@@ -56,8 +59,8 @@ The mobile app uses the same endpoints; implement matching screens there.
 
 - [x] **M1 — Backend API.** OTP model/repository, mailer, service, controller,
       validation, routes.
-- [x] **M2 — SMTP config.** `.env.local` / `.env.example` variables and dev
-      console fallback.
+- [x] **M2 — SMTP config.** `.env.local` / `.env.example` variables and
+      explicit password-reset delivery failures.
 - [x] **M3 — Web forgot-password flow.** Login link + email/OTP/reset steps.
 - [x] **M4 — Change password.** Authenticated API + web page linked in nav and
       footer.

@@ -76,7 +76,7 @@ export default function AboutScreen() {
           knowledge. With experience in modern web technologies and system
           management, the founder designed this platform to be simple, reliable,
           and accessible for women entrepreneurs. The vision is to use
-          technology as a bridge that connects talented home chefs with people
+          technology as a bridge that connects talented Kitchen Queens with people
           who appreciate authentic homemade food.
         </Text>
       </View>

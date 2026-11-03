@@ -16,6 +16,7 @@ export interface Food {
   price: number;
   perUnit: string;
   seller: string;
+  sellerId: string;
   sellerVerified: boolean;
   sellerImage: string;
   area: string;

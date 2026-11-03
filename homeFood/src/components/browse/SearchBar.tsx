@@ -14,7 +14,7 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChangeText,
-  placeholder = "Search dishes, cravings, a home chef…",
+  placeholder = "Search dishes, cravings, a Kitchen Queen…",
   style,
 }: SearchBarProps) {
   const [focused, setFocused] = React.useState(false);

@@ -318,7 +318,20 @@ export default function FoodDetailScreen() {
             </Text>
 
             {/* Seller */}
-            <View style={tw`mt-3 flex-row items-center gap-3`}>
+            <TouchableOpacity
+              onPress={() => {
+                if (!food.sellerId) return;
+                router.push({
+                  pathname: "/(stack)/kitchen/[id]" as never,
+                  params: { id: food.sellerId },
+                });
+              }}
+              disabled={!food.sellerId}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`View ${food.seller}'s Kitchen Queen profile`}
+              style={tw`mt-3 flex-row items-center gap-3`}
+            >
               {food.sellerImage ? (
                 <Image
                   source={{ uri: food.sellerImage }}
@@ -343,10 +356,15 @@ export default function FoodDetailScreen() {
                   {food.sellerVerified && <VerifiedBadge size={16} />}
                 </View>
                 <Text style={tw`text-xs text-textMuted`}>
-                  Home chef · {food.area}
+                  Kitchen Queen · {food.area}
                 </Text>
               </View>
-            </View>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={colors.textMuted}
+              />
+            </TouchableOpacity>
 
             {/* Rating */}
             <View style={tw`mt-4 flex-row flex-wrap items-center gap-2`}>

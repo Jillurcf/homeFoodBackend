@@ -14,6 +14,7 @@ export interface FoodsQuery {
   search?: string;
   category?: string;
   area?: string;
+  sellerId?: string;
   limit?: number;
   page?: number;
 }
@@ -59,6 +60,7 @@ const buildListParams = (params?: FoodsQuery | void) => {
   if (query.search?.trim()) cleaned.search = query.search.trim();
   if (query.category) cleaned.category = query.category;
   if (query.area) cleaned.area = query.area;
+  if (query.sellerId) cleaned.sellerId = query.sellerId;
   if (query.page) cleaned.page = query.page;
 
   return cleaned;

@@ -9,7 +9,7 @@ import tw from "@/src/lib/tailwind";
 const PILLARS = [
   {
     icon: "shield-checkmark-outline" as const,
-    title: "Verified home chefs",
+    title: "Verified Kitchen Queens",
     body: "Every seller passes NID verification, and their kitchen is reviewed before going live.",
   },
   {
